@@ -2,35 +2,37 @@
 
 import type { WeeklyAct } from "@/lib/types";
 
-const ACTS: { act: WeeklyAct; label: string; day: string }[] = [
-  { act: "CONNECTOR", label: "Connector", day: "Sun/Mon" },
-  { act: "ACCUMULATION", label: "Accumulation", day: "Tue" },
-  { act: "REVERSAL", label: "Reversal", day: "Wed" },
-  { act: "DISTRIBUTION", label: "Distribution", day: "Thu" },
-  { act: "EPILOGUE", label: "Epilogue", day: "Fri" },
+const ACTS: { act: WeeklyAct; label: string; day: string; icon: string }[] = [
+  { act: "CONNECTOR", label: "Connector", day: "Sun/Mon", icon: "🔗" },
+  { act: "ACCUMULATION", label: "Accumulation", day: "Tue", icon: "📦" },
+  { act: "REVERSAL", label: "Reversal", day: "Wed", icon: "🔄" },
+  { act: "DISTRIBUTION", label: "Distribution", day: "Thu", icon: "📤" },
+  { act: "EPILOGUE", label: "Epilogue", day: "Fri", icon: "🏁" },
 ];
 
 export default function WeeklyActDisplay({ currentAct }: { currentAct: WeeklyAct }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-      <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-slate-400">
-        Weekly 5-Act Structure
-      </h3>
-      <div className="flex gap-1">
-        {ACTS.map(({ act, label, day }) => {
+    <div className="glass-card p-5">
+      <h3 className="section-title mb-4">Weekly 5-Act Structure</h3>
+      <div className="flex gap-2">
+        {ACTS.map(({ act, label, day, icon }, idx) => {
           const active = act === currentAct;
+          const past = ACTS.findIndex((a) => a.act === currentAct) > idx;
           return (
             <div
               key={act}
-              className={`flex-1 rounded-lg px-2 py-2 text-center transition-colors ${
+              className={`flex-1 rounded-xl px-2 py-3 text-center transition-all duration-300 ${
                 active
-                  ? "bg-amber-500/20 border border-amber-500/50"
-                  : "bg-slate-800/50 border border-slate-800"
+                  ? "glass-card-active bg-brand/10"
+                  : past
+                    ? "bg-surface-200 border border-white/[0.04]"
+                    : "bg-surface-100 border border-white/[0.04]"
               }`}
             >
+              <div className="text-base">{icon}</div>
               <div
-                className={`text-[10px] font-bold uppercase tracking-wider ${
-                  active ? "text-amber-300" : "text-slate-600"
+                className={`mt-1 text-[11px] font-bold uppercase tracking-wider ${
+                  active ? "text-brand" : past ? "text-slate-400" : "text-slate-600"
                 }`}
               >
                 {label}

@@ -4,8 +4,159 @@
 
 :root {
   color-scheme: dark;
+  --brand: #00e68a;
+  --brand-dim: rgba(0, 230, 138, 0.15);
+  --surface: #0d1117;
+  --surface-card: #161b22;
+  --surface-elevated: #1c2333;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-brand: rgba(0, 230, 138, 0.2);
 }
 
 body {
-  @apply bg-slate-950 text-slate-100 antialiased;
+  @apply bg-surface text-slate-100 antialiased;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 230, 138, 0.04), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 50%, rgba(0, 100, 200, 0.02), transparent);
+}
+
+/* ═══ Glass Card Effect ═══ */
+.glass-card {
+  @apply relative overflow-hidden rounded-xl border border-white/[0.06] bg-surface-50 shadow-card;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.glass-card:hover {
+  border-color: rgba(0, 230, 138, 0.15);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 230, 138, 0.05);
+}
+.glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 230, 138, 0.02) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* ═══ Active / Highlighted Card ═══ */
+.glass-card-active {
+  @apply glass-card;
+  border-color: rgba(0, 230, 138, 0.3) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 230, 138, 0.1);
+}
+
+/* ═══ Stat Card ═══ */
+.stat-card {
+  @apply glass-card p-4;
+}
+.stat-card .stat-label {
+  @apply text-[11px] font-medium uppercase tracking-wider text-slate-500;
+}
+.stat-card .stat-value {
+  @apply mt-1.5 text-2xl font-bold text-slate-50;
+}
+
+/* ═══ Green Accent Text ═══ */
+.text-brand {
+  color: var(--brand);
+}
+
+/* ═══ Custom Scrollbar ═══ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ═══ Section Title ═══ */
+.section-title {
+  @apply text-xs font-semibold uppercase tracking-widest text-slate-400;
+  letter-spacing: 0.1em;
+}
+
+/* ═══ Green Gradient Button ═══ */
+.btn-brand {
+  @apply rounded-lg bg-brand px-4 py-2 text-sm font-bold text-surface transition;
+  box-shadow: 0 2px 10px rgba(0, 230, 138, 0.2);
+}
+.btn-brand:hover {
+  @apply bg-brand-400;
+  box-shadow: 0 4px 20px rgba(0, 230, 138, 0.3);
+}
+.btn-brand:disabled {
+  @apply cursor-not-allowed opacity-40;
+  box-shadow: none;
+}
+
+/* ═══ Ghost Button ═══ */
+.btn-ghost {
+  @apply rounded-lg border border-white/10 bg-transparent px-4 py-2 text-sm font-medium text-slate-300 transition;
+}
+.btn-ghost:hover {
+  @apply border-brand/30 text-brand;
+}
+
+/* ═══ Tag / Badge ═══ */
+.badge-green {
+  @apply inline-flex items-center rounded-full bg-brand/15 px-2.5 py-0.5 text-[10px] font-bold text-brand;
+}
+.badge-red {
+  @apply inline-flex items-center rounded-full bg-red-500/15 px-2.5 py-0.5 text-[10px] font-bold text-red-400;
+}
+.badge-amber {
+  @apply inline-flex items-center rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[10px] font-bold text-amber-400;
+}
+
+/* ═══ Table Styling ═══ */
+.data-table {
+  @apply w-full text-left text-[11px];
+}
+.data-table thead {
+  @apply text-slate-500;
+}
+.data-table thead th {
+  @apply pb-2 font-medium uppercase tracking-wider;
+  font-size: 10px;
+}
+.data-table tbody tr {
+  @apply border-t border-white/[0.04] text-slate-300 transition;
+}
+.data-table tbody tr:hover {
+  @apply bg-white/[0.02];
+}
+.data-table td {
+  @apply py-2;
+}
+
+/* ═══ Progress Bar ═══ */
+.progress-bar {
+  @apply h-2 w-full overflow-hidden rounded-full bg-surface-200;
+}
+.progress-bar-fill {
+  @apply h-full rounded-full transition-all duration-700;
+  background: linear-gradient(90deg, #00e68a, #00b36b);
+}
+
+/* ═══ Divider ═══ */
+.divider {
+  @apply h-px w-full bg-white/[0.06];
+}
+
+/* ═══ Pulse Dot ═══ */
+.pulse-dot {
+  @apply h-2 w-2 rounded-full bg-brand;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 230, 138, 0.4); }
+  50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(0, 230, 138, 0); }
 }

@@ -4,23 +4,21 @@ import type { TradeRecord } from "@/lib/types";
 
 export default function TradeHistory({ trades }: { trades: TradeRecord[] }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-      <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-slate-400">
-        Trade History
-      </h3>
+    <div className="glass-card p-5">
+      <h3 className="section-title mb-4">Trade History</h3>
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-[11px]">
-          <thead className="text-slate-500">
+        <table className="data-table">
+          <thead>
             <tr>
-              <th className="py-1.5">Time</th>
-              <th className="py-1.5">ID</th>
-              <th className="py-1.5">Side</th>
-              <th className="py-1.5">Entry</th>
-              <th className="py-1.5">SL</th>
-              <th className="py-1.5">TP</th>
-              <th className="py-1.5">Lots</th>
-              <th className="py-1.5">P&L</th>
-              <th className="py-1.5">Status</th>
+              <th>Time</th>
+              <th>ID</th>
+              <th>Side</th>
+              <th>Entry</th>
+              <th>SL</th>
+              <th>TP</th>
+              <th>Lots</th>
+              <th>P&L</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -34,34 +32,41 @@ export default function TradeHistory({ trades }: { trades: TradeRecord[] }) {
               trades.map((t) => {
                 const pnlColor =
                   t.pnl > 0
-                    ? "text-emerald-400"
+                    ? "text-brand"
                     : t.pnl < 0
                       ? "text-red-400"
                       : "text-slate-400";
                 return (
-                  <tr
-                    key={t.trade_id}
-                    className="border-t border-slate-800/50 text-slate-300"
-                  >
-                    <td className="py-1.5">
+                  <tr key={t.trade_id}>
+                    <td>
                       {new Date(t.opened_at).toLocaleTimeString("en-GB", {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
                     </td>
-                    <td className="py-1.5 font-mono text-[10px]">{t.trade_id}</td>
-                    <td className="py-1.5">{t.direction}</td>
-                    <td className="py-1.5">{t.entry_price.toFixed(2)}</td>
-                    <td className="py-1.5">{t.stop_loss.toFixed(2)}</td>
-                    <td className="py-1.5">
+                    <td className="font-mono text-[10px] text-slate-500">{t.trade_id}</td>
+                    <td>
+                      <span className={t.direction === "BUY" ? "text-brand" : "text-red-400"}>
+                        {t.direction}
+                      </span>
+                    </td>
+                    <td className="font-mono">{t.entry_price.toFixed(2)}</td>
+                    <td className="font-mono">{t.stop_loss.toFixed(2)}</td>
+                    <td className="font-mono">
                       {t.take_profit ? t.take_profit.toFixed(2) : "—"}
                     </td>
-                    <td className="py-1.5">{t.lot_size.toFixed(2)}</td>
-                    <td className={`py-1.5 font-medium ${pnlColor}`}>
+                    <td>{t.lot_size.toFixed(2)}</td>
+                    <td className={`font-bold ${pnlColor}`}>
                       {t.pnl >= 0 ? "+" : ""}
                       {t.pnl.toFixed(2)}
                     </td>
-                    <td className="py-1.5">{t.status}</td>
+                    <td>
+                      <span className={`text-[10px] font-medium ${
+                        t.status === "open" ? "text-brand" : "text-slate-500"
+                      }`}>
+                        {t.status}
+                      </span>
+                    </td>
                   </tr>
                 );
               })

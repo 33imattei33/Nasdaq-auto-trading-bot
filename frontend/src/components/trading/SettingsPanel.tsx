@@ -183,7 +183,7 @@ export default function SettingsPanel({
       {/* Gear button */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="rounded-lg bg-slate-800/80 p-2 text-slate-400 transition hover:bg-slate-700 hover:text-slate-200"
+        className="rounded-lg border border-white/[0.06] bg-surface-50 p-2 text-slate-400 transition hover:border-brand/30 hover:text-brand"
         title="Account Settings"
       >
         <svg
@@ -208,16 +208,16 @@ export default function SettingsPanel({
 
       {/* Modal overlay */}
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
+          <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-surface p-6 shadow-2xl">
             {/* Header */}
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-100">
+              <h2 className="text-lg font-bold text-slate-50">
                 Account Settings
               </h2>
               <button
                 onClick={() => setOpen(false)}
-                className="rounded-lg p-1 text-slate-500 transition hover:bg-slate-800 hover:text-slate-300"
+                className="rounded-lg p-1 text-slate-500 transition hover:bg-surface-200 hover:text-slate-300"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -227,15 +227,15 @@ export default function SettingsPanel({
 
             {/* Connection status */}
             <div
-              className={`mb-4 flex items-center gap-2 rounded-lg border px-3 py-2 text-xs ${
+              className={`mb-4 flex items-center gap-2 rounded-xl border px-3 py-2.5 text-xs ${
                 isLive
-                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                  : "border-slate-700 bg-slate-800/50 text-slate-400"
+                  ? "border-brand/20 bg-brand/5 text-brand"
+                  : "border-white/[0.06] bg-surface-50 text-slate-400"
               }`}
             >
               <span
                 className={`h-2 w-2 rounded-full ${
-                  isLive ? "bg-emerald-400 animate-pulse" : "bg-slate-500"
+                  isLive ? "bg-brand animate-pulse" : "bg-slate-500"
                 }`}
               />
               {isLive ? (
@@ -253,7 +253,7 @@ export default function SettingsPanel({
               <button
                 onClick={handleDisconnect}
                 disabled={loading}
-                className="mb-4 w-full rounded-lg border border-red-500/30 bg-red-500/10 py-2 text-sm font-medium text-red-300 transition hover:bg-red-500/20 disabled:opacity-50"
+                className="mb-4 w-full rounded-xl border border-red-500/20 bg-red-500/10 py-2.5 text-sm font-semibold text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
               >
                 {loading ? "Disconnecting…" : "Disconnect"}
               </button>
@@ -263,12 +263,12 @@ export default function SettingsPanel({
             {!isLive && (
               <div className="space-y-3">
                 {/* Tab switcher */}
-                <div className="flex gap-1 rounded-lg bg-slate-800 p-0.5">
+                <div className="flex gap-1 rounded-xl bg-surface-50 p-1">
                   <button
                     onClick={() => { setTab("browser"); setResult(null); }}
-                    className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition ${
+                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                       tab === "browser"
-                        ? "bg-amber-500/20 text-amber-300"
+                        ? "bg-brand/15 text-brand"
                         : "text-slate-500 hover:text-slate-300"
                     }`}
                   >
@@ -276,9 +276,9 @@ export default function SettingsPanel({
                   </button>
                   <button
                     onClick={() => { setTab("token"); setResult(null); }}
-                    className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition ${
+                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                       tab === "token"
-                        ? "bg-amber-500/20 text-amber-300"
+                        ? "bg-brand/15 text-brand"
                         : "text-slate-500 hover:text-slate-300"
                     }`}
                   >
@@ -286,9 +286,9 @@ export default function SettingsPanel({
                   </button>
                   <button
                     onClick={() => { setTab("credentials"); setResult(null); }}
-                    className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition ${
+                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                       tab === "credentials"
-                        ? "bg-amber-500/20 text-amber-300"
+                        ? "bg-brand/15 text-brand"
                         : "text-slate-500 hover:text-slate-300"
                     }`}
                   >
@@ -299,8 +299,8 @@ export default function SettingsPanel({
                 {/* ──── Browser Login Tab ──── */}
                 {tab === "browser" && (
                   <div className="space-y-3">
-                    <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
-                      <p className="text-[11px] leading-relaxed text-emerald-200/80">
+                    <div className="rounded-xl border border-brand/20 bg-brand/5 p-3">
+                      <p className="text-[11px] leading-relaxed text-brand/80">
                         <strong>Recommended.</strong> A Chromium browser will open
                         with your credentials pre-filled and auto-submitted.
                         If Tradovate shows a CAPTCHA, solve it in the browser
@@ -317,7 +317,7 @@ export default function SettingsPanel({
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="e.g. APEX_384980"
-                        className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none transition focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30"
+                        className="w-full rounded-lg border border-white/[0.06] bg-surface-50 px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none transition focus:border-brand/50 focus:ring-1 focus:ring-brand/20"
                       />
                     </div>
 
@@ -330,19 +330,19 @@ export default function SettingsPanel({
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Uses saved .env password"
-                        className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none transition focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30"
+                        className="w-full rounded-lg border border-white/[0.06] bg-surface-50 px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none transition focus:border-brand/50 focus:ring-1 focus:ring-brand/20"
                       />
                     </div>
 
                     {/* Environment toggle */}
-                    <div className="flex items-center gap-3 rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2">
+                    <div className="flex items-center gap-3 rounded-lg border border-white/[0.06] bg-surface-50 px-3 py-2">
                       <span className="text-xs text-slate-400">Environment</span>
-                      <div className="flex gap-1 rounded-lg bg-slate-800 p-0.5">
+                      <div className="flex gap-1 rounded-xl bg-surface-100 p-0.5">
                         <button
                           onClick={() => setLive(false)}
                           className={`rounded-md px-3 py-1 text-xs font-medium transition ${
                             !live
-                              ? "bg-amber-500/20 text-amber-300"
+                              ? "bg-brand/15 text-brand"
                               : "text-slate-500 hover:text-slate-300"
                           }`}
                         >
@@ -352,7 +352,7 @@ export default function SettingsPanel({
                           onClick={() => setLive(true)}
                           className={`rounded-md px-3 py-1 text-xs font-medium transition ${
                             live
-                              ? "bg-red-500/20 text-red-300"
+                              ? "bg-red-500/20 text-red-400"
                               : "text-slate-500 hover:text-slate-300"
                           }`}
                         >
@@ -370,7 +370,7 @@ export default function SettingsPanel({
                     <button
                       onClick={handleBrowserLogin}
                       disabled={loading}
-                      className="w-full rounded-lg bg-emerald-500/90 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="w-full rounded-lg bg-brand py-2.5 text-sm font-bold text-surface transition hover:bg-brand-400 shadow-glow-sm disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       {loading ? (
                         <span className="flex items-center justify-center gap-2">
@@ -386,8 +386,8 @@ export default function SettingsPanel({
                     </button>
 
                     {loading && (
-                      <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
-                        <p className="text-center text-[11px] text-amber-200/80">
+                      <div className="rounded-lg border border-brand/20 bg-brand/5 p-3">
+                        <p className="text-center text-[11px] text-brand-200">
                           <strong>A Chromium window should appear.</strong><br/>
                           Your credentials are auto-filled and submitted.<br/>
                           If you see a CAPTCHA, solve it in that window.<br/>
@@ -401,7 +401,7 @@ export default function SettingsPanel({
                 {/* ──── Token Tab ──── */}
                 {tab === "token" && (
                   <div className="space-y-3">
-                    <div className="rounded-lg border border-slate-700 bg-slate-800/30 p-3">
+                    <div className="rounded-lg border border-white/[0.06] bg-surface-50 p-3">
                       <p className="text-[10px] leading-relaxed text-slate-500">
                         If you already have a token from DevTools / Local Storage,
                         paste it below.
@@ -417,7 +417,7 @@ export default function SettingsPanel({
                         value={accessToken}
                         onChange={(e) => setAccessToken(e.target.value)}
                         placeholder="Paste your access token here…"
-                        className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 font-mono text-xs text-slate-200 placeholder-slate-600 outline-none transition focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30"
+                        className="w-full rounded-lg border border-white/[0.06] bg-surface-50 px-3 py-2 font-mono text-xs text-slate-200 placeholder-slate-600 outline-none transition focus:border-brand/50 focus:ring-1 focus:ring-brand/20"
                       />
                     </div>
 
@@ -430,19 +430,19 @@ export default function SettingsPanel({
                         value={mdAccessToken}
                         onChange={(e) => setMdAccessToken(e.target.value)}
                         placeholder="Only if different from above"
-                        className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 font-mono text-xs text-slate-200 placeholder-slate-600 outline-none focus:border-amber-500/50"
+                        className="w-full rounded border border-white/[0.06] bg-surface-50 px-2 py-1.5 font-mono text-xs text-slate-200 placeholder-slate-600 outline-none focus:border-brand/50"
                       />
                     </div>
 
                     {/* Environment toggle */}
-                    <div className="flex items-center gap-3 rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2">
+                    <div className="flex items-center gap-3 rounded-lg border border-white/[0.06] bg-surface-50 px-3 py-2">
                       <span className="text-xs text-slate-400">Environment</span>
-                      <div className="flex gap-1 rounded-lg bg-slate-800 p-0.5">
+                      <div className="flex gap-1 rounded-xl bg-surface-100 p-0.5">
                         <button
                           onClick={() => setLive(false)}
                           className={`rounded-md px-3 py-1 text-xs font-medium transition ${
                             !live
-                              ? "bg-amber-500/20 text-amber-300"
+                              ? "bg-brand/15 text-brand"
                               : "text-slate-500 hover:text-slate-300"
                           }`}
                         >
@@ -452,7 +452,7 @@ export default function SettingsPanel({
                           onClick={() => setLive(true)}
                           className={`rounded-md px-3 py-1 text-xs font-medium transition ${
                             live
-                              ? "bg-red-500/20 text-red-300"
+                              ? "bg-red-500/20 text-red-400"
                               : "text-slate-500 hover:text-slate-300"
                           }`}
                         >
@@ -469,7 +469,7 @@ export default function SettingsPanel({
                     <button
                       onClick={handleTokenConnect}
                       disabled={loading || !accessToken.trim()}
-                      className="w-full rounded-lg bg-amber-500/90 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="w-full rounded-lg bg-brand py-2.5 text-sm font-bold text-surface transition hover:bg-brand-400 shadow-glow-sm disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       {loading ? (
                         <span className="flex items-center justify-center gap-2">
@@ -498,7 +498,7 @@ export default function SettingsPanel({
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="e.g. APEX_384980"
-                        className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none transition focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30"
+                        className="w-full rounded-lg border border-white/[0.06] bg-surface-50 px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none transition focus:border-brand/50 focus:ring-1 focus:ring-brand/20"
                       />
                     </div>
 
@@ -511,19 +511,19 @@ export default function SettingsPanel({
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••••"
-                        className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none transition focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30"
+                        className="w-full rounded-lg border border-white/[0.06] bg-surface-50 px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none transition focus:border-brand/50 focus:ring-1 focus:ring-brand/20"
                       />
                     </div>
 
                     {/* Environment toggle */}
-                    <div className="flex items-center gap-3 rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2">
+                    <div className="flex items-center gap-3 rounded-lg border border-white/[0.06] bg-surface-50 px-3 py-2">
                       <span className="text-xs text-slate-400">Environment</span>
-                      <div className="flex gap-1 rounded-lg bg-slate-800 p-0.5">
+                      <div className="flex gap-1 rounded-xl bg-surface-100 p-0.5">
                         <button
                           onClick={() => setLive(false)}
                           className={`rounded-md px-3 py-1 text-xs font-medium transition ${
                             !live
-                              ? "bg-amber-500/20 text-amber-300"
+                              ? "bg-brand/15 text-brand"
                               : "text-slate-500 hover:text-slate-300"
                           }`}
                         >
@@ -533,7 +533,7 @@ export default function SettingsPanel({
                           onClick={() => setLive(true)}
                           className={`rounded-md px-3 py-1 text-xs font-medium transition ${
                             live
-                              ? "bg-red-500/20 text-red-300"
+                              ? "bg-red-500/20 text-red-400"
                               : "text-slate-500 hover:text-slate-300"
                           }`}
                         >
@@ -557,7 +557,7 @@ export default function SettingsPanel({
                     </button>
 
                     {showAdvanced && (
-                      <div className="space-y-2 rounded-lg border border-slate-800 bg-slate-800/30 p-3">
+                      <div className="space-y-2 rounded-lg border border-white/[0.06] bg-surface-50 p-3">
                         <div>
                           <label className="mb-1 block text-xs text-slate-500">
                             Client ID (cid)
@@ -567,7 +567,7 @@ export default function SettingsPanel({
                             value={cid}
                             onChange={(e) => setCid(e.target.value)}
                             placeholder="Numeric ID from Tradovate"
-                            className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-slate-200 placeholder-slate-600 outline-none focus:border-amber-500/50"
+                            className="w-full rounded border border-white/[0.06] bg-surface-50 px-2 py-1.5 text-xs text-slate-200 placeholder-slate-600 outline-none focus:border-brand/50"
                           />
                         </div>
                         <div>
@@ -579,7 +579,7 @@ export default function SettingsPanel({
                             value={sec}
                             onChange={(e) => setSec(e.target.value)}
                             placeholder="Secret from Tradovate API settings"
-                            className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-slate-200 placeholder-slate-600 outline-none focus:border-amber-500/50"
+                            className="w-full rounded border border-white/[0.06] bg-surface-50 px-2 py-1.5 text-xs text-slate-200 placeholder-slate-600 outline-none focus:border-brand/50"
                           />
                         </div>
                         <p className="text-[10px] leading-relaxed text-slate-600">
@@ -588,7 +588,7 @@ export default function SettingsPanel({
                             href="https://trader.tradovate.com/#/security"
                             target="_blank"
                             rel="noreferrer"
-                            className="text-amber-500/70 underline"
+                            className="text-brand/70 underline"
                           >
                             trader.tradovate.com → Security
                           </a>
@@ -600,7 +600,7 @@ export default function SettingsPanel({
                     <button
                       onClick={handleConnect}
                       disabled={loading || !username || !password}
-                      className="w-full rounded-lg bg-amber-500/90 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="w-full rounded-lg bg-brand py-2.5 text-sm font-bold text-surface transition hover:bg-brand-400 shadow-glow-sm disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       {loading ? (
                         <span className="flex items-center justify-center gap-2">
@@ -639,7 +639,7 @@ export default function SettingsPanel({
               <div
                 className={`mt-3 rounded-lg border px-3 py-2 text-xs ${
                   result.ok
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                    ? "border-brand/30 bg-brand/10 text-brand"
                     : "border-red-500/30 bg-red-500/10 text-red-300"
                 }`}
               >

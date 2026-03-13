@@ -120,7 +120,7 @@ export default function OrderPanel({
 
       {/* Order status */}
       {orderStatus && (
-        <p className="mt-2 text-center text-[10px] text-amber-300">
+        <p className="mt-3 text-center text-xs font-medium text-amber-400">
           {orderStatus}
         </p>
       )}

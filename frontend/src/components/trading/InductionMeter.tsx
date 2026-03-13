@@ -21,26 +21,31 @@ export default function InductionMeter({
 }) {
   const meta = STATE_LABELS[state] ?? STATE_LABELS.NO_PATTERN;
   const pct = Math.max(meta.pct, meter);
-  const color =
-    pct >= 85
-      ? "bg-emerald-500"
-      : pct >= 50
-        ? "bg-amber-500"
-        : "bg-slate-600";
+  const isHot = pct >= 85;
+  const isWarm = pct >= 50;
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-      <h3 className="text-xs font-medium uppercase tracking-wider text-slate-400">
-        Induction Meter
-      </h3>
-      <div className="mt-2 text-lg font-bold text-slate-100">{pct.toFixed(0)}%</div>
-      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-800">
+    <div className={`glass-card p-5 ${isHot ? "animate-glow-pulse" : ""}`}>
+      <h3 className="section-title">Induction Meter</h3>
+      <div className="mt-3 flex items-baseline gap-2">
+        <span className={`text-3xl font-bold ${isHot ? "text-brand" : isWarm ? "text-amber-400" : "text-slate-300"}`}>
+          {pct.toFixed(0)}%
+        </span>
+        <span className="text-xs text-slate-500">{meta.label}</span>
+      </div>
+      <div className="progress-bar mt-3">
         <div
-          className={`h-full rounded-full transition-all duration-700 ${color}`}
-          style={{ width: `${pct}%` }}
+          className="progress-bar-fill"
+          style={{
+            width: `${pct}%`,
+            background: isHot
+              ? "linear-gradient(90deg, #00e68a, #00ff9d)"
+              : isWarm
+                ? "linear-gradient(90deg, #f59e0b, #fbbf24)"
+                : "linear-gradient(90deg, #475569, #64748b)",
+          }}
         />
       </div>
-      <div className="mt-2 text-[10px] text-slate-500">{meta.label}</div>
     </div>
   );
 }
