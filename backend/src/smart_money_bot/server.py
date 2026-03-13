@@ -356,9 +356,21 @@ async def get_dashboard():
     """Full dashboard state — merges engine analysis + live Tradovate data."""
     state = await orchestrator.get_dashboard_state()
 
-    # Overlay live market price from Tradovate
-    if _is_live and isinstance(broker, TradovateBroker) and broker.last_price > 0:
-        state.current_price = broker.last_price
+    # Overlay live market price + real-time P&L from Tradovate
+    if _is_live and isinstance(broker, TradovateBroker):
+        live = broker.last_price
+        if live > 0:
+            state.current_price = live
+            # Recalculate unrealized P&L from live price for instant updates
+            unrealized = 0.0
+            for pos in broker.cached_positions:
+                net_pos = pos.get("netPos", 0) or 0
+                net_price = pos.get("netPrice", 0.0) or 0.0
+                if net_pos != 0 and net_price > 0:
+                    unrealized += (live - net_price) * net_pos * 2.0
+            state.account.daily_pnl = round(unrealized, 2)
+            state.account.equity = round(state.account.balance + unrealized, 2)
+            state.account.free_margin = state.account.equity
 
     return state
 
@@ -438,8 +450,12 @@ async def get_positions():
 async def get_orders():
     """Order history from Tradovate."""
     if _is_live and isinstance(broker, TradovateBroker):
-        orders = await broker.get_orders()
-        return {"source": "tradovate", "orders": orders}
+        try:
+            orders = await broker.get_orders()
+            return {"source": "tradovate", "orders": orders}
+        except Exception as e:
+            log.exception("get_orders failed")
+            return {"source": "tradovate", "orders": [], "error": str(e)}
     return {"source": "paper", "orders": []}
 
 

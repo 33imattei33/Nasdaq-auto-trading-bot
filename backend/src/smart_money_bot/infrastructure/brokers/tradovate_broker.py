@@ -479,21 +479,39 @@ class TradovateBroker(BrokerPort):
         resp.raise_for_status()
         orders = resp.json()
 
-        # Enrich working orders with full details (price, stopPrice, qty, ordType)
+        # Enrich working orders — try /order/item first, then try
+        # /orderVersion/deps to get actual prices for bracket orders
         enriched = []
+        order_versions: dict[int, dict] = {}  # orderId → version with prices
+
+        # Fetch order versions for working orders (contains actual prices)
+        working_ids = [
+            o["id"] for o in orders
+            if o.get("ordStatus") in ("Working", "Accepted")
+        ]
+        for oid in working_ids:
+            try:
+                vr = await http.get(
+                    "/orderVersion/deps",
+                    params={"masterid": oid},
+                    headers=self._auth_headers(),
+                )
+                if vr.status_code == 200:
+                    versions = vr.json()
+                    if versions:
+                        # Use the most recent version (last in list)
+                        order_versions[oid] = versions[-1]
+            except Exception:
+                pass
+
         for o in orders:
-            if o.get("ordStatus") in ("Working", "Accepted"):
-                try:
-                    detail_resp = await http.get(
-                        f"/order/item",
-                        params={"id": o["id"]},
-                        headers=self._auth_headers(),
-                    )
-                    if detail_resp.status_code == 200:
-                        enriched.append(detail_resp.json())
-                        continue
-                except Exception:
-                    pass
+            oid = o["id"]
+            if oid in order_versions:
+                v = order_versions[oid]
+                o["ordType"] = v.get("orderType", o.get("ordType"))
+                o["qty"] = v.get("orderQty", o.get("qty"))
+                o["price"] = v.get("price", o.get("price"))
+                o["stopPrice"] = v.get("stopPrice", o.get("stopPrice"))
             enriched.append(o)
 
         self._orders = enriched
@@ -520,9 +538,21 @@ class TradovateBroker(BrokerPort):
         for cb in self._cash_balances:
             balance += cb.get("amount", 0.0) or 0.0
 
+        # Calculate unrealized P&L — prefer Tradovate field, fallback to
+        # manual calculation from live price (REST positions don't include it)
         unrealized = 0.0
+        live = self.last_price
         for pos in self._positions:
-            unrealized += pos.get("unrealizedPnL", 0.0) or 0.0
+            api_pnl = pos.get("unrealizedPnL")
+            if api_pnl is not None:
+                unrealized += api_pnl
+            elif live > 0:
+                net_pos = pos.get("netPos", 0) or 0
+                net_price = pos.get("netPrice", 0.0) or 0.0
+                if net_pos != 0 and net_price > 0:
+                    # MNQ: $2.00 per point per contract
+                    diff = (live - net_price) * net_pos * 2.0
+                    unrealized += diff
 
         equity = balance + unrealized
 
@@ -1327,7 +1357,11 @@ class TradovateBroker(BrokerPort):
 
     @property
     def last_price(self) -> float:
-        return self._last_quote.get("last", 0.0) or 0.0
+        price = self._last_quote.get("last", 0.0) or 0.0
+        # Fallback to last candle close when WS quote has no Trade entry
+        if price <= 0 and self._candle_buffer:
+            price = self._candle_buffer[-1].close
+        return price
 
     @property
     def bid(self) -> float:
