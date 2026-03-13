@@ -33,7 +33,7 @@ export default function PositionsPanel({
             const qty = Math.abs(p.netPos);
             const unrealizedPnl =
               lastPrice > 0
-                ? (lastPrice - p.netPrice) * p.netPos * 5 // MNQ = $5/pt
+                ? (lastPrice - p.netPrice) * p.netPos * 2 // MNQ = $2/pt
                 : 0;
             const pnlColor =
               unrealizedPnl > 0

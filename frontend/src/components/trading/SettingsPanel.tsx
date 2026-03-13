@@ -53,10 +53,21 @@ export default function SettingsPanel({
     message: string;
   } | null>(null);
 
-  // Load saved username from localStorage
+  // Load saved username from localStorage or backend .env
   useEffect(() => {
     const saved = localStorage.getItem("tv_username");
-    if (saved) setUsername(saved);
+    if (saved) {
+      setUsername(saved);
+    } else {
+      // Try to get saved credentials from backend .env
+      fetch("http://localhost:8000/api/settings/saved-credentials")
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.username && !username) setUsername(data.username);
+        })
+        .catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleConnect = async () => {
@@ -288,17 +299,18 @@ export default function SettingsPanel({
                 {/* ──── Browser Login Tab ──── */}
                 {tab === "browser" && (
                   <div className="space-y-3">
-                    <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
-                      <p className="text-[11px] leading-relaxed text-amber-200/80">
-                        <strong>Recommended for APEX accounts.</strong> A browser
-                        window will open — log in normally and solve the CAPTCHA
-                        if shown. Your token is captured automatically.
+                    <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+                      <p className="text-[11px] leading-relaxed text-emerald-200/80">
+                        <strong>Recommended.</strong> A Chromium browser will open
+                        with your credentials pre-filled and auto-submitted.
+                        If Tradovate shows a CAPTCHA, solve it in the browser
+                        window. Your token is captured automatically.
                       </p>
                     </div>
 
                     <div>
                       <label className="mb-1 block text-xs font-medium text-slate-400">
-                        Username <span className="text-slate-600">(pre-filled in browser)</span>
+                        Username <span className="text-slate-600">(optional — uses .env if empty)</span>
                       </label>
                       <input
                         type="text"
@@ -311,13 +323,13 @@ export default function SettingsPanel({
 
                     <div>
                       <label className="mb-1 block text-xs font-medium text-slate-400">
-                        Password <span className="text-slate-600">(pre-filled in browser)</span>
+                        Password <span className="text-slate-600">(optional — uses .env if empty)</span>
                       </label>
                       <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••••"
+                        placeholder="Uses saved .env password"
                         className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder-slate-600 outline-none transition focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30"
                       />
                     </div>
@@ -358,7 +370,7 @@ export default function SettingsPanel({
                     <button
                       onClick={handleBrowserLogin}
                       disabled={loading}
-                      className="w-full rounded-lg bg-amber-500/90 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="w-full rounded-lg bg-emerald-500/90 py-2.5 text-sm font-bold text-slate-900 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       {loading ? (
                         <span className="flex items-center justify-center gap-2">
@@ -366,7 +378,7 @@ export default function SettingsPanel({
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                           </svg>
-                          Waiting for browser login…
+                          Logging in — check the browser window…
                         </span>
                       ) : (
                         "🌐 Launch Browser Login"
@@ -374,10 +386,14 @@ export default function SettingsPanel({
                     </button>
 
                     {loading && (
-                      <p className="text-center text-[10px] text-slate-500">
-                        A Chromium window should appear. Log in there and this
-                        will connect automatically. Timeout: 3 min.
-                      </p>
+                      <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
+                        <p className="text-center text-[11px] text-amber-200/80">
+                          <strong>A Chromium window should appear.</strong><br/>
+                          Your credentials are auto-filled and submitted.<br/>
+                          If you see a CAPTCHA, solve it in that window.<br/>
+                          This will auto-connect once login succeeds (3 min timeout).
+                        </p>
+                      </div>
                     )}
                   </div>
                 )}

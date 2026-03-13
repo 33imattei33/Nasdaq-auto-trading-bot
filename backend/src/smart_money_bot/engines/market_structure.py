@@ -88,12 +88,14 @@ class MarketStructureAnalyzer:
             return []
 
         zones: list[LiquidityZone] = []
+        atr = self._atr(candles)
+        threshold = atr * 0.3
         lows = sorted(c.low for c in candles)
         highs = sorted(c.high for c in candles)
 
         # Cluster around repeated swing lows → buy-side liquidity
         for i in range(len(lows) - 1):
-            if abs(lows[i] - lows[i + 1]) < self._atr(candles) * 0.3:
+            if abs(lows[i] - lows[i + 1]) < threshold:
                 zones.append(LiquidityZone(
                     price_low=lows[i],
                     price_high=lows[i + 1],
@@ -103,7 +105,7 @@ class MarketStructureAnalyzer:
 
         # Cluster around repeated swing highs → sell-side liquidity
         for i in range(len(highs) - 1):
-            if abs(highs[i] - highs[i + 1]) < self._atr(candles) * 0.3:
+            if abs(highs[i] - highs[i + 1]) < threshold:
                 zones.append(LiquidityZone(
                     price_low=highs[i],
                     price_high=highs[i + 1],

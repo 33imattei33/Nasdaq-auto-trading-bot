@@ -28,6 +28,7 @@ export function useSmartMoney() {
   const [fills, setFills] = useState<TradovateFill[]>([]);
   const [candles, setCandles] = useState<CandleBar[]>([]);
   const [timeframe, setTimeframe] = useState<string>("1m");
+  const timeframeRef = useRef<string>("1m");
   const [error, setError] = useState<string | null>(null);
   const [orderStatus, setOrderStatus] = useState<string | null>(null);
   const mounted = useRef(true);
@@ -82,7 +83,7 @@ export function useSmartMoney() {
       }
       // Candles for chart
       try {
-        const cRes = await fetch(`${API}/api/candles?limit=1000`);
+        const cRes = await fetch(`${API}/api/candles?limit=10000&tf=${timeframeRef.current}`);
         if (cRes.ok) {
           const c = await cRes.json();
           if (mounted.current) setCandles(c.candles ?? []);
@@ -97,8 +98,8 @@ export function useSmartMoney() {
     mounted.current = true;
     poll();
     pollLive();
-    const id1 = setInterval(poll, 3000);
-    const id2 = setInterval(pollLive, 2000);
+    const id1 = setInterval(poll, 5000);
+    const id2 = setInterval(pollLive, 5000);
     return () => {
       mounted.current = false;
       clearInterval(id1);
@@ -120,23 +121,26 @@ export function useSmartMoney() {
   const changeTimeframe = useCallback(
     async (tf: string) => {
       setTimeframe(tf);
+      timeframeRef.current = tf;
+      // Clear candles immediately so chart resets
+      setCandles([]);
       try {
-        const res = await fetch(`${API}/api/timeframe`, {
+        await fetch(`${API}/api/timeframe`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ timeframe: tf }),
         });
-        if (res.ok) {
-          // Clear current candles so the chart resets while new data loads
-          setCandles([]);
-          // Poll for new candles shortly
-          setTimeout(() => pollLive(), 1500);
+        // Fetch new candles with the new timeframe
+        const cRes = await fetch(`${API}/api/candles?limit=10000&tf=${tf}`);
+        if (cRes.ok) {
+          const c = await cRes.json();
+          if (mounted.current) setCandles(c.candles ?? []);
         }
       } catch {
         /* swallow */
       }
     },
-    [pollLive]
+    []
   );
 
   const placeMarketOrder = useCallback(

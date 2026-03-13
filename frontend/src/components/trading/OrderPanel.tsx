@@ -20,7 +20,7 @@ export default function OrderPanel({
 }) {
   const [qty, setQty] = useState(1);
   const [tp, setTp] = useState(80);
-  const [sl, setSl] = useState(20);
+  const [sl, setSl] = useState(40);
   const [mode, setMode] = useState<"market" | "bracket">("bracket");
 
   return (

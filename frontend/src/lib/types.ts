@@ -81,7 +81,6 @@ export interface ForexiaSignal {
   symbol: string;
   direction: TradeDirection;
   signal_type: string;
-  entry: number;
   stop_loss: number;
   take_profit: number;
   lot_size: number;

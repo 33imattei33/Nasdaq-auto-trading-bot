@@ -209,19 +209,24 @@ class Orchestrator:
             return None
 
         # 3c. Intraday close gate — no new trades near close
-        if self._is_intraday_close_time(now):
+        if not force and self._is_intraday_close_time(now):
             log.warning("Past APEX intraday close time — no new trades")
             return None
 
         # 4. Need candles
         if len(candles) < 25:
-            log.debug(f"Not enough candles ({len(candles)} < 25)")
+            log.info(f"Scan: not enough candles ({len(candles)} < 25)")
             return None
+
+        log.info(
+            f"Scan: {len(candles)} candles | phase={phase.value} | "
+            f"force={force} | last_close={candles[-1].close:.2f}"
+        )
 
         # 5. Signature trade detection
         state = self.signature.evaluate(candles)
+        log.info(f"Scan: induction_state={state.value}")
         if state != InductionState.REVERSAL_CONFIRMED:
-            log.debug(f"Induction state: {state} — not confirmed")
             return None
 
         # 6. Build signal

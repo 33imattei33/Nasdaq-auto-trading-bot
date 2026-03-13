@@ -134,7 +134,7 @@ export default function Home() {
               await closeAllPositions();
             }
           }}
-          disabled={!isLive}
+          disabled={!isLive && !(positions && positions.some(p => p.netPos !== 0))}
           className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-1.5 text-sm font-medium text-red-300 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-30"
         >
           ✖ Close All Positions
@@ -152,7 +152,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* ═══ NQ100 CHART ═══ */}
+      {/* ═══ BOT SIGNAL CHART (internal candles + overlays) ═══ */}
       <NQ100Chart
         candles={candles}
         lastPrice={quote?.last && quote.last > 0 ? quote.last : data.current_price}

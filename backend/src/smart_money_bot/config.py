@@ -37,26 +37,22 @@ class RiskConfig:
     # ── Per-trade risk ──
     max_risk_per_trade_pct: float = 0.02        # 2 % of equity
     max_risk_per_trade_usd: float = 300.0        # HARD CAP: $300 max loss per trade
-    max_sl_points: float = 60.0                  # 60 NQ points max SL distance
-    # For MNQ: 60 pts × $2/pt × 1 contract = $120. Even 2 contracts = $240.
-    # 3 contracts at 50 pts = $300 → hits the dollar cap.
+    max_sl_points: float = 20.0                  # 20 NQ points max SL for scalping (was 60)
 
     # ── Position sizing ──
-    default_contracts: int = 1                   # start with 1 MNQ
+    default_contracts: int = 2                   # scalping: 2 MNQ default
     max_contracts: int = 4                       # never more than 4 MNQ per trade
-    # At max SL (60 pts), 4 contracts = 60 × $2 × 4 = $480 → BLOCKED by $300 cap
-    # So effectively: 1-2 contracts with tight SL, or 1 with wider SL.
 
     # ── Daily limits ──
-    max_trades_per_day: int = 3                  # max 3 trades per day
+    max_trades_per_day: int = 10                 # scalping: more trades allowed (was 3)
     max_daily_loss_usd: float = 600.0            # stop trading if day loss > $600
     # This is 20% of the trailing drawdown ($3,000). Conservative.
 
     # ── Bracket order defaults (in ticks, 1 tick = 0.25 pts for MNQ) ──
-    default_sl_ticks: int = 80                   # 20 points = 80 ticks → $40/contract
-    default_tp_ticks: int = 160                  # 40 points = 160 ticks (2:1 R:R)
-    min_sl_ticks: int = 16                       # 4 points minimum SL
-    max_sl_ticks: int = 240                      # 60 points maximum SL
+    default_sl_ticks: int = 40                   # 10 points = 40 ticks → $20/contract (scalp)
+    default_tp_ticks: int = 80                   # 20 points = 80 ticks (2:1 R:R scalp)
+    min_sl_ticks: int = 8                        # 2 points minimum SL
+    max_sl_ticks: int = 80                       # 20 points maximum SL (scalp)
 
     # ── MNQ contract specs ──
     tick_size: float = 0.25                      # MNQ tick size
@@ -116,10 +112,11 @@ class WeeklyActConfig:
 # ─────────────────────────────────────────────────────────────────────
 @dataclass(frozen=True)
 class SignatureTradeConfig:
-    min_consolidation_candles: int = 6
-    wedge_slope_threshold: float = 0.3
-    stop_hunt_wick_multiplier: float = 1.5
-    exhaustion_body_ratio: float = 0.4
+    min_consolidation_candles: int = 3          # was 6 — 3 candles enough for scalping wedge
+    wedge_slope_threshold: float = 0.8          # was 0.3 — much more lenient slope check
+    stop_hunt_wick_multiplier: float = 0.8      # was 1.5 — smaller wicks count as hunts
+    stop_hunt_lookback: int = 10                # was 20 (hardcoded) — shorter zone for scalps
+    exhaustion_body_ratio: float = 0.5          # was 0.4 — more candles qualify
     min_induction_pct: float = 60.0             # % of retail trapped before entry
 
 

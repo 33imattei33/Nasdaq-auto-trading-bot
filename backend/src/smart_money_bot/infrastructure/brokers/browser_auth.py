@@ -22,6 +22,10 @@ async def browser_login_tradovate(
     """
     Launch a headed Chromium browser → Tradovate login page.
 
+    When credentials are provided, auto-fills and auto-submits the
+    login form. If a CAPTCHA appears, the browser stays open for
+    the user to solve it manually.
+
     Returns
     -------
     dict  with keys:
@@ -61,6 +65,7 @@ async def browser_login_tradovate(
                 "auth/accesstokenrequest",
                 "auth/oauthtoken",
                 "auth/renewaccesstoken",
+                "auth/me",
             )
             if any(ep in url_lower for ep in auth_endpoints):
                 try:
@@ -85,35 +90,51 @@ async def browser_login_tradovate(
         except Exception as e:
             log.warning(f"Navigation issue (continuing): {e}")
 
-        # ── pre-fill credentials ──────────────────────────────────
-        await asyncio.sleep(3)  # let SPA bootstrap
-        try:
-            name_selectors = [
-                'input[name="name"]',
-                'input[placeholder*="user" i]',
-                'input[placeholder*="name" i]',
-                'input[autocomplete="username"]',
-                'input[type="text"]',
-            ]
-            for sel in name_selectors:
-                loc = page.locator(sel).first
-                if await loc.count() > 0 and username:
-                    await loc.fill(username)
-                    log.info("Pre-filled username")
-                    break
+        # ── wait for SPA to render the login form ─────────────────
+        await asyncio.sleep(3)
 
-            pwd_loc = page.locator('input[type="password"]').first
-            if await pwd_loc.count() > 0 and password:
-                await pwd_loc.fill(password)
-                log.info("Pre-filled password")
+        # ── auto-fill and submit login form ───────────────────────
+        auto_submitted = False
+        try:
+            # Wait for the username field to be visible
+            name_input = page.locator("#name-input")
+            pwd_input = page.locator("#password-input")
+
+            if await name_input.count() > 0 and username:
+                await name_input.fill(username)
+                log.info("Filled username")
+
+            if await pwd_input.count() > 0 and password:
+                await pwd_input.fill(password)
+                log.info("Filled password")
+
+            # Click the Login button if we have both credentials
+            if username and password:
+                # Find the Login button (exact text match)
+                login_btn = page.locator("button", has_text="Login").first
+                if await login_btn.count() > 0:
+                    await login_btn.click()
+                    log.info("Clicked Login button — waiting for auth…")
+                    auto_submitted = True
+                else:
+                    # Fallback: try submitting the form directly
+                    await pwd_input.press("Enter")
+                    log.info("Pressed Enter on password field")
+                    auto_submitted = True
         except Exception as e:
-            log.debug(f"Pre-fill skipped: {e}")
+            log.warning(f"Auto-fill/submit issue: {e}")
 
         # ── wait for token capture ────────────────────────────────
-        log.info(
-            "Waiting for you to complete login in the browser window… "
-            f"(timeout {timeout_seconds}s)"
-        )
+        if auto_submitted:
+            log.info(
+                "Login submitted — waiting for token "
+                "(solve CAPTCHA if the browser shows one)…"
+            )
+        else:
+            log.info(
+                "Please complete login in the browser window… "
+                f"(timeout {timeout_seconds}s)"
+            )
 
         for _ in range(timeout_seconds * 2):
             if captured.get("access_token"):

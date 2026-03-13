@@ -28,6 +28,7 @@ import json
 import logging
 import os
 import platform
+import time as _time
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -92,13 +93,14 @@ class TradovateConfig:
     @staticmethod
     def from_env() -> TradovateConfig:
         cid_raw = os.getenv("TRADOVATE_CID")
+        sec = os.getenv("TRADOVATE_SEC") or os.getenv("TRADOVATE_SECRET")
         return TradovateConfig(
             username=os.getenv("TRADOVATE_USERNAME", ""),
             password=os.getenv("TRADOVATE_PASSWORD", ""),
-            app_id=os.getenv("TRADOVATE_APP_ID", "smart-money-bot"),
+            app_id=os.getenv("TRADOVATE_APP_ID", "SmartMoneyBot"),
             app_version=os.getenv("TRADOVATE_APP_VERSION", "1.0"),
             cid=int(cid_raw) if cid_raw else None,
-            sec=os.getenv("TRADOVATE_SEC"),
+            sec=sec,
             device_id=os.getenv("TRADOVATE_DEVICE_ID"),
             account_spec=os.getenv("TRADOVATE_ACCOUNT_SPEC"),
             live=os.getenv("TRADOVATE_LIVE", "").lower() in ("1", "true", "yes"),
@@ -161,6 +163,10 @@ class TradovateBroker(BrokerPort):
         self._on_quote: Callable[[dict], None] | None = None
         self._on_position_update: Callable[[dict], None] | None = None
         self._on_fill: Callable[[dict], None] | None = None
+
+        # REST cache (TTL-based to avoid 429 rate-limiting)
+        self._REST_CACHE_TTL: float = 15.0  # seconds
+        self._cache_ts: dict[str, float] = {}  # key → last fetch epoch
 
     # ═══════════════════════════════════════════════════════════════════
     #  AUTHENTICATION
@@ -410,15 +416,25 @@ class TradovateBroker(BrokerPort):
     #  ACCOUNT DATA
     # ═══════════════════════════════════════════════════════════════════
 
+    def _cache_fresh(self, key: str) -> bool:
+        """Return True if cached data for *key* is still within TTL."""
+        ts = self._cache_ts.get(key, 0.0)
+        return (_time.monotonic() - ts) < self._REST_CACHE_TTL
+
     async def get_accounts(self) -> list[dict]:
+        if self._cache_fresh("accounts") and self._accounts:
+            return self._accounts
         await self.ensure_authenticated()
         http = await self._get_http()
         resp = await http.get("/account/list", headers=self._auth_headers())
         resp.raise_for_status()
         self._accounts = resp.json()
+        self._cache_ts["accounts"] = _time.monotonic()
         return self._accounts
 
     async def get_cash_balance(self) -> list[dict]:
+        if self._cache_fresh("cash") and self._cash_balances:
+            return self._cash_balances
         await self.ensure_authenticated()
         http = await self._get_http()
         if self._account_id:
@@ -432,9 +448,12 @@ class TradovateBroker(BrokerPort):
             )
         resp.raise_for_status()
         self._cash_balances = resp.json()
+        self._cache_ts["cash"] = _time.monotonic()
         return self._cash_balances
 
     async def get_positions(self) -> list[dict]:
+        if self._cache_fresh("positions") and self._positions:
+            return self._positions
         await self.ensure_authenticated()
         http = await self._get_http()
         if self._account_id:
@@ -448,22 +467,29 @@ class TradovateBroker(BrokerPort):
             )
         resp.raise_for_status()
         self._positions = resp.json()
+        self._cache_ts["positions"] = _time.monotonic()
         return self._positions
 
     async def get_orders(self) -> list[dict]:
+        if self._cache_fresh("orders") and self._orders:
+            return self._orders
         await self.ensure_authenticated()
         http = await self._get_http()
         resp = await http.get("/order/list", headers=self._auth_headers())
         resp.raise_for_status()
         self._orders = resp.json()
+        self._cache_ts["orders"] = _time.monotonic()
         return self._orders
 
     async def get_fills(self) -> list[dict]:
+        if self._cache_fresh("fills") and self._fills:
+            return self._fills
         await self.ensure_authenticated()
         http = await self._get_http()
         resp = await http.get("/fill/list", headers=self._auth_headers())
         resp.raise_for_status()
         self._fills = resp.json()
+        self._cache_ts["fills"] = _time.monotonic()
         return self._fills
 
     async def get_account_state(self) -> AccountState:
@@ -612,7 +638,7 @@ class TradovateBroker(BrokerPort):
                             "elementSizeUnit": "UnderlyingUnits",
                             "withHistogram": False,
                         },
-                        "timeRange": {"asMuchAsElements": count},
+                        "timeRange": {"asMuchAsElements": 2000},
                     }
                     await self._md_ws.send(
                         f"md/getChart\n{rid}\n\n{json.dumps(chart_req)}"
@@ -1018,7 +1044,7 @@ class TradovateBroker(BrokerPort):
                             "elementSizeUnit": "UnderlyingUnits",
                             "withHistogram": False,
                         },
-                        "timeRange": {"asMuchAsElements": 500},
+                        "timeRange": {"asMuchAsElements": 2000},
                     }
                     await ws.send(
                         f"md/getChart\n{rid}\n\n{json.dumps(chart_req)}"
@@ -1267,7 +1293,7 @@ class TradovateBroker(BrokerPort):
                     "elementSizeUnit": "UnderlyingUnits",
                     "withHistogram": False,
                 },
-                "timeRange": {"asMuchAsElements": 500},
+                "timeRange": {"asMuchAsElements": 2000},
             }
             await self._md_ws.send(
                 f"md/getChart\n{rid}\n\n{json.dumps(chart_req)}"
