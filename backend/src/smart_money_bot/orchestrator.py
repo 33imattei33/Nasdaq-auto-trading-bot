@@ -198,6 +198,11 @@ class Orchestrator:
             log.debug("Friday epilogue — reduced risk, skipping")
             return None
 
+        # Friday NY session: trade with reduced size (max 2 contracts)
+        is_friday_ny = (act == WeeklyAct.EPILOGUE and not self.weekly.should_reduce_risk(now))
+        if is_friday_ny:
+            log.info("Friday NY kill zone — trading with reduced size")
+
         # 3. Daily limit gate
         if not force and self._is_daily_limit_reached(now):
             log.debug("Daily trade limit reached")
@@ -245,6 +250,12 @@ class Orchestrator:
 
         # Calculate correct position size from risk rules
         contracts = self._calculate_contracts(sl_distance_pts)
+
+        # Friday NY: cap at 2 contracts for reduced risk
+        if is_friday_ny:
+            contracts = min(contracts, 2)
+            log.info(f"Friday NY: capped contracts to {contracts}")
+
         signal.lot_size = float(contracts)
 
         # 7. Validate SL against ALL APEX safety rules

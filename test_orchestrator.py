@@ -29,10 +29,11 @@ candles = []
 for i in range(30):
     t = base_time + i * 60
     r = max(2.0, 15.0 - i * 0.4)
-    o = base_price + random.uniform(-r, r)
-    c = o + random.uniform(-r, r)
-    h = max(o, c) + random.uniform(0.5, r * 0.5)
-    l = min(o, c) - random.uniform(0.5, r * 0.5)
+    mid = base_price + random.uniform(-1.0, 1.0)
+    o = mid + random.uniform(-r * 0.3, r * 0.3)
+    c = mid + random.uniform(-r * 0.3, r * 0.3)
+    h = max(o, c) + random.uniform(0.5, r * 0.4)
+    l = min(o, c) - random.uniform(0.5, r * 0.4)
     candles.append(make_candle(t, round(o, 2), round(h, 2), round(l, 2), round(c, 2)))
 
 # Phase 2: Stop hunt candle — big wick below recent lows
@@ -230,9 +231,9 @@ if signal:
     assert placed.stop_loss == signal.stop_loss
 
     # Test daily limit gate — fill timestamps to hit limit, scan WITHOUT force
-    original_limit = CONFIG.risk.max_trades_per_day  # 3
-    for _ in range(original_limit - len(orch._trade_timestamps)):
-        orch._trade_timestamps.append(test_now)  # fill up to limit
+    original_limit = CONFIG.risk.max_trades_per_day  # 10
+    # Overwrite timestamps to use the test date (record_execution uses datetime.now)
+    orch._trade_timestamps = [test_now for _ in range(original_limit)]
     assert len(orch._trade_timestamps) == original_limit
     # Scan without force at 14:33 UTC (in NY killzone)
     signal2 = orch.scan(now=test_now)
@@ -244,5 +245,71 @@ if signal:
     print("=" * 60)
 else:
     print("\n✗ Cannot test execution — no signal was generated")
+
+# ─── Test detection method differentiation ───
+print("\n" + "=" * 60)
+print("DETECTION METHOD & CONFIDENCE TESTS")
+print("=" * 60)
+
+# Test 1: Full signature (already confirmed above)
+det1 = SignatureTradeDetector()
+s1 = det1.evaluate(candles)
+assert s1 == InductionState.REVERSAL_CONFIRMED
+assert det1._last_detection == "signature", f"Expected 'signature', got '{det1._last_detection}'"
+sig1 = det1.generate_signal(candles, CONFIG.symbol, 1, "TEST-SIG")
+assert sig1 is not None
+assert sig1.confidence == 90.0
+assert sig1.metadata.get("detection_method") == "signature"
+print(f"✓ Full signature: confidence={sig1.confidence}, method={sig1.metadata['detection_method']}")
+
+# Test 2: Momentum scalp — build candles with a clear trend + pullback
+momentum_candles = []
+for i in range(30):
+    t = base_time + i * 60
+    # Strong bullish trend for first 20 candles
+    if i < 20:
+        o = base_price + i * 3.0
+        c = o + random.uniform(1.0, 4.0)
+    # Pullback for candles 20-24
+    elif i < 25:
+        o = base_price + 60.0 - (i - 20) * 2.0
+        c = o - random.uniform(0.5, 2.0)
+    # Resume candle
+    else:
+        o = base_price + 50.0
+        c = o + random.uniform(2.0, 5.0)
+    h = max(o, c) + random.uniform(0.5, 2.0)
+    l = min(o, c) - random.uniform(0.5, 2.0)
+    momentum_candles.append(make_candle(t, round(o, 2), round(h, 2), round(l, 2), round(c, 2)))
+
+det2 = SignatureTradeDetector()
+s2 = det2.evaluate(momentum_candles)
+if s2 == InductionState.REVERSAL_CONFIRMED and det2._last_detection == "momentum":
+    sig2 = det2.generate_signal(momentum_candles, CONFIG.symbol, 1, "TEST-MOM")
+    assert sig2.confidence == 70.0
+    assert sig2.metadata.get("detection_method") == "momentum"
+    print(f"✓ Momentum scalp: confidence={sig2.confidence}, method={sig2.metadata['detection_method']}")
+else:
+    print(f"  Momentum scalp: state={s2.value}, method={det2._last_detection} (pattern-dependent on random data)")
+
+# Test 3: No pattern with flat data
+flat_candles = []
+for i in range(30):
+    t = base_time + i * 60
+    flat_candles.append(make_candle(t, 24800.0, 24800.5, 24799.5, 24800.0))
+det3 = SignatureTradeDetector()
+s3 = det3.evaluate(flat_candles)
+assert s3 != InductionState.REVERSAL_CONFIRMED, "Flat data should NOT trigger"
+print(f"✓ Flat data correctly rejected: state={s3.value}")
+
+# Test 4: generate_signal returns None when state is not REVERSAL_CONFIRMED
+det4 = SignatureTradeDetector()
+det4.induction_state = InductionState.STOP_HUNT_ACTIVE
+sig4 = det4.generate_signal(candles, CONFIG.symbol, 1, "TEST-NONE")
+assert sig4 is None
+print(f"✓ generate_signal returns None when state={det4.induction_state.value}")
+
+print("\n✓ ALL DETECTION METHOD TESTS PASSED")
+print("=" * 60)
 
 print("\nDONE")

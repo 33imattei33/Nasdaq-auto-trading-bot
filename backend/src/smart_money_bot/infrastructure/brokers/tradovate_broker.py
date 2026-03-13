@@ -477,7 +477,26 @@ class TradovateBroker(BrokerPort):
         http = await self._get_http()
         resp = await http.get("/order/list", headers=self._auth_headers())
         resp.raise_for_status()
-        self._orders = resp.json()
+        orders = resp.json()
+
+        # Enrich working orders with full details (price, stopPrice, qty, ordType)
+        enriched = []
+        for o in orders:
+            if o.get("ordStatus") in ("Working", "Accepted"):
+                try:
+                    detail_resp = await http.get(
+                        f"/order/item",
+                        params={"id": o["id"]},
+                        headers=self._auth_headers(),
+                    )
+                    if detail_resp.status_code == 200:
+                        enriched.append(detail_resp.json())
+                        continue
+                except Exception:
+                    pass
+            enriched.append(o)
+
+        self._orders = enriched
         self._cache_ts["orders"] = _time.monotonic()
         return self._orders
 

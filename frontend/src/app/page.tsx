@@ -21,6 +21,7 @@ export default function Home() {
     health,
     quote,
     positions,
+    orders,
     fills,
     candles,
     timeframe,
@@ -165,6 +166,24 @@ export default function Home() {
           netPos: p.netPos,
           netPrice: p.netPrice,
           contractId: p.contractId,
+        }))}
+        orders={orders
+          ?.filter((o) => o.ordStatus === "Working" || o.ordStatus === "Accepted")
+          .map((o) => ({
+            price: o.stopPrice ?? o.price ?? 0,
+            qty: o.qty ?? 0,
+            type: o.ordType ?? "Market",
+            action: o.action ?? "Buy",
+            label: o.text,
+          }))}
+        pendingSignals={data.pending_signals?.map((s) => ({
+          entry_price: s.entry_price,
+          stop_loss: s.stop_loss,
+          take_profit: s.take_profit,
+          direction: s.direction,
+          lot_size: s.lot_size,
+          confidence: s.confidence,
+          signal_type: s.signal_type,
         }))}
         liquidityZones={data.liquidity_zones?.map((z) => ({
           price_low: z.price_low,

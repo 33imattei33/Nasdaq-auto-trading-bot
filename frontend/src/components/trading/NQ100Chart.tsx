@@ -17,6 +17,24 @@ import type { CandleBar } from "@/lib/types";
  *  possible — the only async part is the initial module load.
  * ═══════════════════════════════════════════════════════════════════ */
 
+interface OrderLine {
+  price: number;
+  qty: number;
+  type: "Stop" | "Limit" | "StopLimit" | "Market" | string;
+  action: string;          // "Buy" | "Sell"
+  label?: string;
+}
+
+interface SignalLine {
+  entry_price: number;
+  stop_loss: number;
+  take_profit: number;
+  direction: "BUY" | "SELL";
+  lot_size: number;
+  confidence: number;
+  signal_type: string;
+}
+
 interface NQ100ChartProps {
   candles: CandleBar[];
   lastPrice?: number;
@@ -26,6 +44,8 @@ interface NQ100ChartProps {
   selectedTf?: string;
   onTimeframeChange?: (tf: string) => void;
   positions?: { netPos: number; netPrice: number; contractId: number }[];
+  orders?: OrderLine[];
+  pendingSignals?: SignalLine[];
   liquidityZones?: {
     price_low: number;
     price_high: number;
@@ -70,6 +90,8 @@ export default function NQ100Chart({
   selectedTf = "1m",
   onTimeframeChange,
   positions,
+  orders,
+  pendingSignals,
   liquidityZones,
 }: NQ100ChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -79,6 +101,8 @@ export default function NQ100Chart({
   const volumeSeriesRef = useRef<any>(null);
   const markersRef = useRef<any>(null);
   const positionLinesRef = useRef<any[]>([]);
+  const orderLinesRef = useRef<any[]>([]);
+  const signalLinesRef = useRef<any[]>([]);
   const liqZoneLinesRef = useRef<any[]>([]);
   const roRef = useRef<ResizeObserver | null>(null);
   const prevCandleCountRef = useRef<number>(0);
@@ -313,6 +337,8 @@ export default function NQ100Chart({
         volumeSeriesRef.current = null;
         markersRef.current = null;
         positionLinesRef.current = [];
+        orderLinesRef.current = [];
+        signalLinesRef.current = [];
         liqZoneLinesRef.current = [];
         setReady(false);
       }
@@ -506,7 +532,7 @@ export default function NQ100Chart({
     }
   }, [positions, uniqueCandles, ready]);
 
-  // ── Position entry price lines (persistent horizontal lines) ──
+  // ── Position entry price lines + PnL (persistent horizontal lines) ──
   useEffect(() => {
     if (!ready || !candleSeriesRef.current) return;
 
@@ -517,24 +543,146 @@ export default function NQ100Chart({
     positionLinesRef.current = [];
 
     const openPos = positions?.filter((p) => p.netPos !== 0) ?? [];
+    const currentPrice = lastPrice && lastPrice > 0 ? lastPrice : 0;
+
     for (const p of openPos) {
       try {
         const isLong = p.netPos > 0;
+        const qty = Math.abs(p.netPos);
+        // Calculate unrealized P&L: (current - entry) * qty * $2/pt
+        const pnl = currentPrice > 0
+          ? (isLong ? currentPrice - p.netPrice : p.netPrice - currentPrice) * qty * 2.0
+          : 0;
+        const pnlStr = pnl !== 0
+          ? ` ${pnl >= 0 ? "+" : ""}${pnl.toFixed(2)} USD`
+          : "";
+
         const line = candleSeriesRef.current.createPriceLine({
           price: p.netPrice,
-          color: isLong ? "#26a69a" : "#ef5350",
+          color: isLong ? "#2196F3" : "#2196F3",
           lineWidth: 2,
           lineStyle: 0, // Solid
           axisLabelVisible: true,
-          title: `${isLong ? "LONG" : "SHORT"} Entry`,
+          title: `${qty}  ${isLong ? "LONG" : "SHORT"}${pnlStr}`,
           lineVisible: true,
-          axisLabelColor: isLong ? "#26a69a" : "#ef5350",
+          axisLabelColor: pnl >= 0 ? "#26a69a" : "#ef5350",
           axisLabelTextColor: "#ffffff",
         });
         positionLinesRef.current.push(line);
       } catch { /* non-critical */ }
     }
-  }, [positions, ready]);
+  }, [positions, lastPrice, ready]);
+
+  // ── Order lines (Stop Loss / Take Profit from broker orders) ──
+  useEffect(() => {
+    if (!ready || !candleSeriesRef.current) return;
+
+    for (const line of orderLinesRef.current) {
+      try { candleSeriesRef.current.removePriceLine(line); } catch { /* ok */ }
+    }
+    orderLinesRef.current = [];
+
+    const activeOrders = orders ?? [];
+    for (const o of activeOrders) {
+      try {
+        if (!o.price || o.price <= 0) continue;
+
+        const isBuyAction = o.action.toLowerCase().includes("buy");
+        const isStop = o.type.toLowerCase().includes("stop");
+        const isLimit = o.type.toLowerCase().includes("limit");
+
+        // Stop orders = SL (red), Limit orders = TP (green)
+        let color: string;
+        let labelBg: string;
+        if (isStop) {
+          color = "#ef5350";    // Red for stop loss
+          labelBg = "#ef5350";
+        } else if (isLimit) {
+          color = "#26a69a";    // Green for take profit
+          labelBg = "#26a69a";
+        } else {
+          color = "#ff9800";    // Orange for other
+          labelBg = "#ff9800";
+        }
+
+        const typeLabel = isStop ? "Stop" : isLimit ? "Limit" : o.type;
+        const actionLabel = isBuyAction ? "Buy" : "Sell";
+
+        const line = candleSeriesRef.current.createPriceLine({
+          price: o.price,
+          color: color,
+          lineWidth: 1,
+          lineStyle: 2, // Dashed
+          axisLabelVisible: true,
+          title: `${o.qty ?? ""}  ${actionLabel} ${typeLabel}`,
+          lineVisible: true,
+          axisLabelColor: labelBg,
+          axisLabelTextColor: "#ffffff",
+        });
+        orderLinesRef.current.push(line);
+      } catch { /* non-critical */ }
+    }
+  }, [orders, ready]);
+
+  // ── Signal lines (pending bot signals — Entry / SL / TP) ──────
+  useEffect(() => {
+    if (!ready || !candleSeriesRef.current) return;
+
+    for (const line of signalLinesRef.current) {
+      try { candleSeriesRef.current.removePriceLine(line); } catch { /* ok */ }
+    }
+    signalLinesRef.current = [];
+
+    const signals = pendingSignals ?? [];
+    for (const s of signals) {
+      try {
+        const isBuy = s.direction === "BUY";
+        const qty = s.lot_size;
+
+        // Entry line (blue, like TradingView)
+        const entryLine = candleSeriesRef.current.createPriceLine({
+          price: s.entry_price,
+          color: "#2196F3",
+          lineWidth: 1,
+          lineStyle: 2,
+          axisLabelVisible: true,
+          title: `${qty}  ${isBuy ? "Buy" : "Sell"} Signal`,
+          lineVisible: true,
+          axisLabelColor: "#2196F3",
+          axisLabelTextColor: "#ffffff",
+        });
+        signalLinesRef.current.push(entryLine);
+
+        // Take Profit line (green)
+        const tpLine = candleSeriesRef.current.createPriceLine({
+          price: s.take_profit,
+          color: "#26a69a",
+          lineWidth: 1,
+          lineStyle: 2,
+          axisLabelVisible: true,
+          title: `${qty}  ${isBuy ? "Sell" : "Buy"} Limit`,
+          lineVisible: true,
+          axisLabelColor: "#26a69a",
+          axisLabelTextColor: "#ffffff",
+        });
+        signalLinesRef.current.push(tpLine);
+
+        // Stop Loss line (red)
+        const slLine = candleSeriesRef.current.createPriceLine({
+          price: s.stop_loss,
+          color: "#ef5350",
+          lineWidth: 1,
+          lineStyle: 2,
+          axisLabelVisible: true,
+          title: `${qty}  ${isBuy ? "Sell" : "Buy"} Stop`,
+          lineVisible: true,
+          axisLabelColor: "#ef5350",
+          axisLabelTextColor: "#ffffff",
+        });
+        signalLinesRef.current.push(slLine);
+      } catch { /* non-critical */ }
+    }
+  }, [pendingSignals, ready]);
 
   // ── Liquidity zone price lines (support/resistance bands) ─────
   useEffect(() => {

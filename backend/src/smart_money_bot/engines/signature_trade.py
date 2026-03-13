@@ -59,6 +59,7 @@ class SignatureTradeDetector:
     def __init__(self) -> None:
         self._cfg = CONFIG.signature
         self.induction_state = InductionState.NO_PATTERN
+        self._last_detection: str = ""  # "signature", "direct", or "momentum"
 
     # ── 1. Wedge / Consolidation ──────────────────────────────────
 
@@ -225,7 +226,8 @@ class SignatureTradeDetector:
         # Method B: Double rejection (2+ wicks hitting same level)
         lows = [c.low for c in candles[-6:-1]]
         highs = [c.high for c in candles[-6:-1]]
-        avg_range = sum(c.high - c.low for c in candles[-20:]) / 20
+        tail = candles[-20:]
+        avg_range = sum(c.high - c.low for c in tail) / len(tail)
 
         if avg_range > 0:
             low_zone = min(lows)
@@ -247,31 +249,41 @@ class SignatureTradeDetector:
     def evaluate(self, candles: list[CandleData]) -> InductionState:
         """Scan the candle history for the Signature Trade sequence.
 
-        The sequence spans multiple candles:
-          - Wedge:      candles[...-3]  (consolidation before the action)
-          - Stop hunt:  candles[-3] or [-2]
-          - Exhaustion: candle after stop hunt
-          - Reversal:   candles[-1] — the current/last candle
+        Pass 1 — Full 4-step sequence (highest confidence):
+          Wedge → Stop Hunt → Exhaustion → Reversal
+          hunt_offset 5..3  (leaves room for exhaustion candle(s))
 
-        We scan the last few candles looking for stop-hunt events and
-        then verify the full sequence around them.
+        Pass 2 — Direct reversal (no exhaustion required):
+          Wedge → Stop Hunt → Reversal
+          hunt_offset 2..1  (hunt + immediate reversal)
+
+        Pass 3 — Momentum scalp fallback:
+          Pullback-continuation or double-rejection
         """
         if len(candles) < 25:
             self.induction_state = InductionState.NO_PATTERN
+            self._last_detection = ""
             return self.induction_state
 
         # Default: no pattern
         self.induction_state = InductionState.NO_PATTERN
+        self._last_detection = ""
 
-        # Check the last 4 candles for a potential stop-hunt event
-        # The stop hunt can be at position -3, -2, or even -1 relative to end
-        for hunt_offset in [3, 2]:
+        # ── Pass 1: Full 4-step sequence (Wedge → Hunt → Exhaustion → Reversal)
+        # hunt_offset ≥ 3 so there's at least 1 candle between hunt and reversal
+        for hunt_offset in [5, 4, 3]:
             hunt_idx = len(candles) - hunt_offset
             if hunt_idx < 21:
                 continue
 
             # 1. Check for wedge BEFORE the hunt candle
             wedge = self._detect_wedge(candles, end_idx=hunt_idx)
+            if not wedge:
+                # Relaxed: try wedge further back
+                for wb in range(hunt_idx - 1, max(20, hunt_idx - 10), -1):
+                    wedge = self._detect_wedge(candles, end_idx=wb)
+                    if wedge:
+                        break
             if not wedge:
                 continue
 
@@ -284,29 +296,31 @@ class SignatureTradeDetector:
 
             self.induction_state = InductionState.STOP_HUNT_ACTIVE
 
-            # 3. Check exhaustion candle(s) between hunt and last candle
-            # The candle(s) after the hunt and before the reversal should show exhaustion
+            # 3. At least one exhaustion candle AFTER the hunt, BEFORE the reversal
             exhaustion_found = False
-            for ex_idx in range(hunt_idx, len(candles) - 1):
+            for ex_idx in range(hunt_idx + 1, len(candles) - 1):
                 if self._is_exhaustion(candles[ex_idx]):
                     exhaustion_found = True
                     break
 
-            if exhaustion_found:
-                self.induction_state = InductionState.EXHAUSTION_DETECTED
+            if not exhaustion_found:
+                continue  # Pass 1 REQUIRES exhaustion
+
+            self.induction_state = InductionState.EXHAUSTION_DETECTED
 
             # 4. Check if the LAST candle is a reversal
             last = candles[-1]
             if self._is_reversal(last, hunt.direction):
                 self.induction_state = InductionState.REVERSAL_CONFIRMED
+                self._last_detection = "signature"
                 log.info(
-                    f"✓ REVERSAL_CONFIRMED: hunt={hunt.direction} at idx {hunt_idx}, "
-                    f"wedge={wedge.candle_count} bars, last close={last.close}"
+                    f"✓ REVERSAL_CONFIRMED (full signature): hunt={hunt.direction} "
+                    f"at idx {hunt_idx}, wedge={wedge.candle_count} bars, "
+                    f"last close={last.close}"
                 )
                 return self.induction_state
 
-        # Also try: stop hunt at the second-to-last candle, reversal at last
-        # (no exhaustion gap between them — direct reversal off the hunt)
+        # ── Pass 2: Direct reversal (Wedge → Hunt → Reversal, no exhaustion)
         for hunt_offset in [2, 1]:
             hunt_idx = len(candles) - hunt_offset
             if hunt_idx < 21:
@@ -335,16 +349,18 @@ class SignatureTradeDetector:
             last = candles[-1]
             if self._is_reversal(last, hunt.direction):
                 self.induction_state = InductionState.REVERSAL_CONFIRMED
+                self._last_detection = "direct"
                 log.info(
-                    f"✓ REVERSAL_CONFIRMED (direct): hunt={hunt.direction} at idx {hunt_idx}, "
-                    f"last close={last.close}"
+                    f"✓ REVERSAL_CONFIRMED (direct): hunt={hunt.direction} "
+                    f"at idx {hunt_idx}, last close={last.close}"
                 )
                 return self.induction_state
 
-        # Signature pattern not found — try momentum scalp
+        # ── Pass 3: Momentum scalp fallback
         momentum_state = self._detect_momentum_scalp(candles)
         if momentum_state == InductionState.REVERSAL_CONFIRMED:
             self.induction_state = InductionState.REVERSAL_CONFIRMED
+            self._last_detection = "momentum"
             log.info(
                 f"✓ REVERSAL_CONFIRMED (momentum scalp): "
                 f"last close={candles[-1].close}"
@@ -362,13 +378,20 @@ class SignatureTradeDetector:
         lot_size: float,
         signal_id: str,
     ) -> ForexiaSignal | None:
-        """Generate a trading signal if REVERSAL_CONFIRMED."""
-        state = self.evaluate(candles)
-        if state != InductionState.REVERSAL_CONFIRMED:
+        """Generate a trading signal if REVERSAL_CONFIRMED.
+
+        Must be called AFTER evaluate() — uses already-computed state
+        to avoid redundant re-evaluation.
+        """
+        if self.induction_state != InductionState.REVERSAL_CONFIRMED:
             return None
 
         current = candles[-1]
         direction = TradeDirection.BUY if current.close > current.open else TradeDirection.SELL
+
+        # Confidence based on detection method
+        confidence_map = {"signature": 90.0, "direct": 80.0, "momentum": 70.0}
+        confidence = confidence_map.get(self._last_detection, 75.0)
 
         # Scalping: tight SL based on recent swing, capped at 15 points
         if direction == TradeDirection.BUY:
@@ -398,6 +421,7 @@ class SignatureTradeDetector:
             stop_loss=round(sl, 2),
             take_profit=round(tp, 2),
             lot_size=lot_size,
-            confidence=85.0,
-            induction_state=state,
+            confidence=confidence,
+            induction_state=self.induction_state,
+            metadata={"detection_method": self._last_detection},
         )

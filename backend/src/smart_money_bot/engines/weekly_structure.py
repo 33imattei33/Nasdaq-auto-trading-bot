@@ -44,4 +44,10 @@ class WeeklyStructureEngine:
         return act in (WeeklyAct.ACCUMULATION, WeeklyAct.REVERSAL)
 
     def should_reduce_risk(self, utc_now: datetime) -> bool:
-        return self.get_current_act(utc_now) == WeeklyAct.EPILOGUE
+        """Reduce risk on Fridays, but allow trading during NY kill zone (14-16 UTC)."""
+        if self.get_current_act(utc_now) != WeeklyAct.EPILOGUE:
+            return False
+        # Allow trading during NY kill zone on Fridays
+        if 14 <= utc_now.hour < 16:
+            return False
+        return True
