@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- *  SMART MONEY BOT — useSmartMoney HOOK
+ *  NQ-TRADING AGENTS — useSmartMoney HOOK
  *  Polls backend for dashboard + Tradovate live data
  * ═══════════════════════════════════════════════════════════════════
  */
@@ -32,6 +32,8 @@ export function useSmartMoney() {
   const [error, setError] = useState<string | null>(null);
   const [orderStatus, setOrderStatus] = useState<string | null>(null);
   const mounted = useRef(true);
+  const failCount = useRef(0);
+  const FAIL_THRESHOLD = 3; // show error only after 3 consecutive failures
 
   /* ── Primary poll (dashboard + health) ── */
   const poll = useCallback(async () => {
@@ -45,14 +47,23 @@ export function useSmartMoney() {
       if (mounted.current) {
         setData(json);
         setError(null);
+        failCount.current = 0;
       }
       if (healthRes.ok) {
         const h: HealthInfo = await healthRes.json();
         if (mounted.current) setHealth(h);
       }
     } catch (err: unknown) {
-      if (mounted.current)
-        setError(err instanceof Error ? err.message : "Connection lost");
+      if (mounted.current) {
+        failCount.current += 1;
+        if (failCount.current >= FAIL_THRESHOLD) {
+          setError(
+            `Backend unreachable: ${
+              err instanceof Error ? err.message : "Failed to fetch"
+            }`
+          );
+        }
+      }
     }
   }, []);
 

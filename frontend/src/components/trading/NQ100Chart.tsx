@@ -291,7 +291,7 @@ export default function NQ100Chart({
             horzAlign: "center",
             vertAlign: "center",
             color: "rgba(120, 123, 134, 0.08)",
-            text: "Smart Money Bot",
+            text: "NQ-Trading Agents",
           },
         });
 

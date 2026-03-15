@@ -8,11 +8,11 @@ sys.path.insert(0, "backend/src")
 
 import random
 from datetime import datetime, timezone
-from smart_money_bot.models.schemas import CandleData, InductionState
-from smart_money_bot.engines.signature_trade import SignatureTradeDetector
-from smart_money_bot.orchestrator import Orchestrator
-from smart_money_bot.infrastructure.brokers.paper_broker import PaperBroker
-from smart_money_bot.config import CONFIG
+from nq_trading_agents.models.schemas import CandleData, InductionState
+from nq_trading_agents.engines.signature_trade import SignatureTradeDetector
+from nq_trading_agents.orchestrator import Orchestrator
+from nq_trading_agents.infrastructure.brokers.paper_broker import PaperBroker
+from nq_trading_agents.config import CONFIG
 
 random.seed(42)
 
@@ -180,7 +180,7 @@ print("TRADE EXECUTION TEST")
 print("=" * 60)
 
 if signal:
-    from smart_money_bot.domain.entities.trade import Trade, TradeSide, TradeStatus
+    from nq_trading_agents.domain.entities.trade import Trade, TradeSide, TradeStatus
 
     # Convert signal to Trade entity (mimics what server.py does)
     side = TradeSide.BUY if signal.direction.value == "BUY" else TradeSide.SELL

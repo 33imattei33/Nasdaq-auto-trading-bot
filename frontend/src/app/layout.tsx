@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Money — NAS100 Execution Panel",
-  description: "Institutional NAS100 Smart Money auto-trading dashboard",
+  title: "NQ-Trading Agents — NAS100 Execution Panel",
+  description: "NQ-Trading Agents — Institutional NAS100 auto-trading dashboard",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
- *  SMART MONEY BOT — TYPESCRIPT CONTRACTS
+ *  NQ-TRADING AGENTS — TYPESCRIPT CONTRACTS
  *  Mirrors backend Pydantic schemas exactly
  * ═══════════════════════════════════════════════════════════════════ */
 
@@ -76,7 +76,7 @@ export interface AccountState {
   daily_pnl: number;
 }
 
-export interface ForexiaSignal {
+export interface TradeSignal {
   signal_id: string;
   symbol: string;
   direction: TradeDirection;
@@ -89,6 +89,9 @@ export interface ForexiaSignal {
   induction_state: InductionState;
   session_phase: SessionPhase;
   weekly_act: WeeklyAct;
+  description: string;
+  thesis: string;
+  confluence_factors: string[];
 }
 
 export interface DashboardState {
@@ -101,24 +104,10 @@ export interface DashboardState {
   induction_meter: number;
   is_killzone: boolean;
   trading_permitted: boolean;
-  pending_signals: ForexiaSignal[];
+  pending_signals: TradeSignal[];
   trade_history: TradeRecord[];
   liquidity_zones: LiquidityZone[];
   market_structure: MarketStructureData | null;
-}
-
-/* Legacy compat (old TradingPanel props) */
-export type TradingPhase = SessionPhase | "RESET";
-export type TradeSide = TradeDirection;
-
-export interface PanelTrade {
-  id: string;
-  side: TradeSide;
-  entry: number;
-  stopLoss: number;
-  lot: number;
-  status: "OPEN" | "CLOSED" | "REJECTED";
-  time: string;
 }
 
 /* ─── Tradovate Live Types ─── */
@@ -198,13 +187,4 @@ export interface CandleBar {
   low: number;
   close: number;
   volume: number;
-}
-
-export interface TradingPanelData {
-  symbol: string;
-  price: number;
-  phase: TradingPhase;
-  activeRiskPercent: number;
-  equity: number;
-  tradeHistory: PanelTrade[];
 }
