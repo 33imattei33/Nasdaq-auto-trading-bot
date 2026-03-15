@@ -4,7 +4,7 @@
 
 ### Institutional-Grade Autonomous Trading System for Nasdaq-100 Futures
 
-**Multi-Agent LLM Pipeline &bull; ICT Smart Money Methodology &bull; APEX 100K Compliant**
+**Multi-Agent LLM Pipeline &bull; FOREXIA Smart Money Methodology &bull; APEX 100K Compliant**
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
