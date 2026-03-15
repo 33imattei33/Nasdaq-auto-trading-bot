@@ -414,14 +414,14 @@ class SignatureTradeDetector:
         if self._last_detection == "signature":
             # Full 4-step analysis
             thesis = (
-                f"Institutional smart money engineered a contracting wedge, "
+                f"Institutional capital engineered a contracting wedge, "
                 f"compressing price action to trap liquidity on both sides. "
                 f"A stop-hunt wick swept {trap_side}, triggering retail stop losses "
                 f"and providing institutions with discounted entries. "
                 f"The subsequent exhaustion candle (doji) confirmed that "
                 f"institutions have absorbed available {absorb}. "
                 f"The decisive {side} reversal candle signals the start of the "
-                f"{phase} phase — smart money is now positioned and price should "
+                f"{phase} phase — institutional capital is now positioned and price should "
                 f"accelerate in the {side} direction."
             )
         elif self._last_detection == "direct":
@@ -430,7 +430,7 @@ class SignatureTradeDetector:
                 f"range extremes. The stop-hunt candle pierced beyond the recent "
                 f"zone, trapping {trap_side} with artificial {opp} pressure. "
                 f"The immediate {side} reversal candle confirms the hunt is complete "
-                f"— smart money has collected liquidity and is now driving price "
+                f"— institutional capital has collected liquidity and is now driving price "
                 f"in the true institutional direction."
             )
         else:

@@ -12,7 +12,7 @@ const FEATURES = [
       </svg>
     ),
     title: "Institutional-Grade Signals",
-    desc: "Our engine detects the exact 4-step Signature Trade used by smart money: Wedge → Stop Hunt → Exhaustion → Reversal. Each signal includes a full analysis thesis and confluence factors.",
+    desc: "Our engine detects the exact 4-step Signature Trade used by FOREXIA methodology: Wedge → Stop Hunt → Exhaustion → Reversal. Each signal includes a full analysis thesis and confluence factors.",
   },
   {
     icon: (
@@ -133,7 +133,7 @@ function Navbar() {
             </svg>
           </div>
           <span className="text-lg font-bold text-white">
-            Smart<span className="text-brand">Money</span>
+            FORE<span className="text-brand">XIA</span>
           </span>
         </Link>
 
@@ -198,7 +198,7 @@ export default function LandingPage() {
             Trade NAS100 Like
             <br />
             <span className="bg-gradient-to-r from-brand via-emerald-300 to-brand bg-clip-text text-transparent">
-              Smart Money
+              FOREXIA
             </span>
           </h1>
 
@@ -252,7 +252,7 @@ export default function LandingPage() {
           <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { step: "01", title: "Wedge Forming", desc: "Price contracts into a narrowing range, trapping liquidity above and below the consolidation zone.", color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20" },
-              { step: "02", title: "Stop Hunt", desc: "A sharp wick pierces key levels, triggering retail stop-losses and providing smart money cheap entries.", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" },
+              { step: "02", title: "Stop Hunt", desc: "A sharp wick pierces key levels, triggering retail stop-losses and providing institutional capital cheap entries.", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" },
               { step: "03", title: "Exhaustion", desc: "A doji candle appears — selling pressure is absorbed. Institutions have finished accumulating.", color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20" },
               { step: "04", title: "Reversal", desc: "A decisive candle in the true direction confirms the move. The bot enters with bracket orders.", color: "text-brand", bg: "bg-brand/10 border-brand/20" },
             ].map((s) => (
@@ -359,7 +359,7 @@ export default function LandingPage() {
             Ready to Trade Like the Institutions?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-slate-400">
-            Join traders using our Smart Money engine to detect institutional moves
+            Join traders using our FOREXIA engine to detect institutional moves
             on NAS100 before they happen.
           </p>
           <Link href="/register" className="btn-brand mt-8 inline-block px-10 py-4 text-base font-bold">
@@ -379,10 +379,10 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                   </svg>
                 </div>
-                <span className="font-bold text-white">Smart<span className="text-brand">Money</span></span>
+                <span className="font-bold text-white">FORE<span className="text-brand">XIA</span></span>
               </div>
               <p className="mt-3 text-xs leading-relaxed text-slate-500">
-                Institutional NAS100 execution engine. Detect smart money moves. Trade with precision.
+                Institutional NAS100 execution engine. Detect institutional moves. Trade with precision.
               </p>
             </div>
             <div>

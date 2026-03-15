@@ -23,7 +23,7 @@
 ║       ↓                                                              ║
 ║   EXECUTION                                                          ║
 ║                                                                      ║
-║   Specialised for: MNQ futures / Intraday scalping / ICT / APEX 100K║
+║   Specialised for: MNQ futures / Intraday scalping / FOREXIA / APEX 100K║
 ╚══════════════════════════════════════════════════════════════════════╝
 """
 

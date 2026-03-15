@@ -265,7 +265,7 @@ class AIAdvisoryEngine:
     """Multi-agent LLM advisory engine for trade signal validation.
 
     Multi-agent LLM advisory for MNQ futures intraday scalping
-    with Smart Money methodology.
+    with FOREXIA methodology.
     """
 
     def __init__(self) -> None:

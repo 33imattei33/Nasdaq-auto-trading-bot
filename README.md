@@ -4,7 +4,7 @@
 
 ### Institutional-Grade Autonomous Trading System for Nasdaq-100 Futures
 
-**Multi-Agent LLM Pipeline &bull; FOREXIA Smart Money Methodology &bull; APEX 100K Compliant**
+**Multi-Agent LLM Pipeline &bull; FOREXIA Methodology &bull; APEX 100K Compliant**
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
@@ -17,7 +17,7 @@
 
 ---
 
-**NQ-Trading Agents** is an autonomous trading system that combines **ICT Smart Money Concepts** with a **6-stage multi-agent LLM pipeline** to detect, validate, and execute institutional-grade trade setups on MNQ (Micro E-mini Nasdaq-100) futures. Built for **APEX 100K** funded accounts with strict risk management hardcoded at every layer.
+**NQ-Trading Agents** is an autonomous trading system that combines the **FOREXIA trading methodology** with a **6-stage multi-agent LLM pipeline** to detect, validate, and execute institutional-grade trade setups on MNQ (Micro E-mini Nasdaq-100) futures. Built for **APEX 100K** funded accounts with strict risk management hardcoded at every layer.
 
 [Features](#-features) &bull; [Architecture](#-system-architecture) &bull; [Quick Start](#-quick-start) &bull; [Configuration](#%EF%B8%8F-configuration) &bull; [API Reference](#-api-reference) &bull; [About Me](#-about-me) &bull; [Contact](#-contact)
 
@@ -524,7 +524,7 @@ NQ-Trading-Agents/
 │       │   ├── ConnectionStatus.tsx
 │       │   └── SettingsPanel.tsx
 │       ├── hooks/
-│       │   ├── useSmartMoney.ts      # Main data hook (REST + polling)
+│       │   ├── useForexia.ts         # Main data hook (REST + polling)
 │       │   └── useAgentEvents.ts     # SSE hook for pipeline events
 │       └── lib/
 │           └── types.ts              # TypeScript contracts
@@ -567,7 +567,7 @@ I specialize in building **production-grade autonomous systems** at the intersec
 
 - **🤖 AI & Multi-Agent Systems** — Designing LLM-powered pipelines with structured debate, adversarial validation, and autonomous decision-making using LangChain, LangGraph, and multi-provider architectures (OpenAI, Anthropic, Google Gemini).
 
-- **📊 Algorithmic Trading & Fintech** — End-to-end trading systems: market microstructure analysis, institutional pattern detection (ICT/Smart Money), risk management engines, and broker API integrations (Tradovate, Interactive Brokers).
+- **📊 Algorithmic Trading & Fintech** — End-to-end trading systems: market microstructure analysis, institutional pattern detection (FOREXIA), risk management engines, and broker API integrations (Tradovate, Interactive Brokers).
 
 - **⚡ Full-Stack Real-Time Applications** — High-performance backends (Python/FastAPI, Node.js) with WebSocket/SSE streaming, connected to modern React frontends (Next.js, TypeScript, Tailwind CSS).
 

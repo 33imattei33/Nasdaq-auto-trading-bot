@@ -37,14 +37,14 @@ export default function LoginPage() {
             </svg>
           </div>
           <span className="text-lg font-bold text-white">
-            Smart<span className="text-brand">Money</span>
+            FORE<span className="text-brand">XIA</span>
           </span>
         </Link>
 
         <div className="w-full max-w-md">
           <h1 className="text-2xl font-bold text-white md:text-3xl">Welcome back</h1>
           <p className="mt-2 text-sm text-slate-400">
-            Log in to access your trading dashboard and Smart Money signals.
+            Log in to access your trading dashboard and FOREXIA signals.
           </p>
 
           {error && (

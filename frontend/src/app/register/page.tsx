@@ -59,7 +59,7 @@ export default function RegisterPage() {
             </svg>
           </div>
           <span className="text-lg font-bold text-white">
-            Smart<span className="text-brand">Money</span>
+            FORE<span className="text-brand">XIA</span>
           </span>
         </Link>
 
@@ -277,7 +277,7 @@ export default function RegisterPage() {
             Start Trading With the Institutions
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-slate-400">
-            Get access to the Smart Money engine — institutional signal detection,
+            Get access to the FOREXIA engine — institutional signal detection,
             automated Tradovate execution, and APEX-compliant risk management.
           </p>
           <div className="mt-8 space-y-3 text-left">

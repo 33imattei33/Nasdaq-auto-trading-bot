@@ -1,7 +1,7 @@
 [project]
 name = "nq-trading-agents"
 version = "0.1.0"
-description = "NAS100 Smart Money auto-trading bot"
+description = "NAS100 FOREXIA auto-trading bot"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115.0",

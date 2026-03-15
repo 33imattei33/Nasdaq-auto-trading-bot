@@ -1,6 +1,6 @@
 "use client";
 
-import { useSmartMoney } from "@/hooks/useSmartMoney";
+import { useForexia } from "@/hooks/useForexia";
 import AccountPanel from "@/components/trading/AccountPanel";
 import SessionPhasePanel from "@/components/trading/SessionPhasePanel";
 import WeeklyActDisplay from "@/components/trading/WeeklyActDisplay";
@@ -40,7 +40,7 @@ export default function Dashboard() {
     startAutoTrade,
     stopAutoTrade,
     closeAllPositions,
-  } = useSmartMoney();
+  } = useForexia();
 
   if (error && !data) {
     return (
@@ -63,7 +63,7 @@ export default function Dashboard() {
           <div className="absolute inset-4 rounded-full bg-brand" />
         </div>
         <p className="text-sm font-medium text-slate-400">
-          Connecting to Smart Money engine…
+          Connecting to FOREXIA engine…
         </p>
       </div>
     );

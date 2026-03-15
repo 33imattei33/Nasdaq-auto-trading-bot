@@ -306,7 +306,7 @@ export default function BlogStudioPage() {
                   onChange={(e) => setTopic(e.target.value)}
                   rows={2}
                   className="w-full rounded-lg border border-white/10 bg-surface-100 px-3 py-2 text-sm text-white placeholder-slate-600 outline-none transition focus:border-brand/40"
-                  placeholder="e.g. How to identify stop hunts in NAS100 using the Smart Money approach..."
+                  placeholder="e.g. How to identify stop hunts in NAS100 using the FOREXIA approach..."
                 />
               </div>
 

@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- *  NQ-TRADING AGENTS — useSmartMoney HOOK
+ *  NQ-TRADING AGENTS — useForexia HOOK
  *  Polls backend for dashboard + Tradovate live data
  * ═══════════════════════════════════════════════════════════════════
  */
@@ -19,7 +19,7 @@ import type {
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-export function useSmartMoney() {
+export function useForexia() {
   const [data, setData] = useState<DashboardState | null>(null);
   const [health, setHealth] = useState<HealthInfo | null>(null);
   const [quote, setQuote] = useState<LiveQuote | null>(null);

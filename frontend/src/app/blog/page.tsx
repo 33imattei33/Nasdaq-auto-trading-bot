@@ -4,12 +4,12 @@ import Link from "next/link";
 
 const POSTS = [
   {
-    slug: "what-is-smart-money",
+    slug: "what-is-forexia",
     category: "Education",
     date: "Mar 10, 2026",
-    title: "What Is Smart Money and Why Does It Matter for NAS100?",
+    title: "What Is FOREXIA and Why Does It Matter for NAS100?",
     excerpt:
-      "Smart money refers to the capital controlled by institutional investors, central banks, and hedge funds. Understanding how they move price is the key to profitable futures trading.",
+      "FOREXIA is our proprietary methodology for reading institutional capital flows — hedge funds, central banks, and institutional investors. Understanding how they move price is the key to profitable futures trading.",
     readTime: "6 min read",
   },
   {
@@ -74,7 +74,7 @@ export default function BlogPage() {
               </svg>
             </div>
             <span className="text-lg font-bold text-white">
-              Smart<span className="text-brand">Money</span>
+              FORE<span className="text-brand">XIA</span>
             </span>
           </Link>
           <div className="flex items-center gap-6">
@@ -96,7 +96,7 @@ export default function BlogPage() {
         <div className="mx-auto max-w-4xl px-6 text-center">
           <p className="section-title text-brand">Blog</p>
           <h1 className="mt-3 text-3xl font-bold text-white md:text-5xl">
-            Smart Money Insights
+            FOREXIA Insights
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-slate-400">
             Deep dives into institutional trading strategies, NAS100 analysis,
@@ -177,7 +177,7 @@ export default function BlogPage() {
             Ready to put this knowledge into action?
           </h2>
           <p className="mt-3 text-slate-400">
-            Start trading with the Smart Money engine — signals with full analysis thesis included.
+            Start trading with the FOREXIA engine — signals with full analysis thesis included.
           </p>
           <Link href="/register" className="btn-brand mt-6 inline-block px-8 py-3 text-sm font-bold">
             Create Free Account

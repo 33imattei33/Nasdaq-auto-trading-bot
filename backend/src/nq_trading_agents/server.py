@@ -384,11 +384,11 @@ async def generate_blog_article(req: BlogGenerateRequest):
     # ── Template sections based on topic analysis ──
     intros = {
         "default": f"Understanding {kw_str} is crucial for any trader looking to gain an edge in the NAS100 futures market. In this comprehensive guide, we break down the key concepts, practical strategies, and real-world applications that will transform your trading approach.",
-        "stop hunt": f"Stop hunts are one of the most misunderstood phenomena in futures trading. Every day, institutional players systematically trigger retail stop-losses to accumulate positions at better prices. Understanding {kw_str} is the first step to trading alongside smart money instead of against it.",
-        "smart money": f"Smart money — the capital controlled by hedge funds, central banks, and institutional traders — moves the NAS100 in predictable patterns. By learning to read these {kw_str} patterns, retail traders can align their entries with the institutions that actually drive price.",
+        "stop hunt": f"Stop hunts are one of the most misunderstood phenomena in futures trading. Every day, institutional players systematically trigger retail stop-losses to accumulate positions at better prices. Understanding {kw_str} is the first step to trading alongside institutional capital instead of against it.",
+        "forexia": f"FOREXIA — our proprietary methodology for reading the capital flows of hedge funds, central banks, and institutional traders — maps how the NAS100 moves in predictable patterns. By learning to read these {kw_str} patterns, retail traders can align their entries with the institutions that actually drive price.",
         "kill zone": f"Timing is everything in futures trading. The {kw_str} concept identifies the exact windows when institutional participation peaks and the best setups form. Trading outside these zones is like fishing in an empty pond.",
         "risk": f"Proper risk management isn't optional — it's the foundation of every profitable trading career. {kw_str.title()} ensures your account survives long enough to capture the big moves. This is especially critical for prop-firm funded accounts with strict drawdown rules.",
-        "signature": f"The Signature Trade is the backbone of our Smart Money detection engine. This 4-step pattern — Wedge → Stop Hunt → Exhaustion → Reversal — is the exact sequence institutions use to trap retail traders before major moves in NAS100.",
+        "signature": f"The Signature Trade is the backbone of our FOREXIA detection engine. This 4-step pattern — Wedge → Stop Hunt → Exhaustion → Reversal — is the exact sequence institutions use to trap retail traders before major moves in NAS100.",
         "hegelian": f"The Hegelian 5-Act weekly structure maps how institutional capital flows through each trading day. Monday's Connector sets the range, Tuesday accumulates, Wednesday reverses, Thursday distributes, and Friday resolves. Understanding {kw_str} gives you a narrative framework for every week.",
     }
 
@@ -440,7 +440,7 @@ async def generate_blog_article(req: BlogGenerateRequest):
          f"- **4-contract maximum** — prevents overexposure in volatile markets\n"
          f"- **Trailing drawdown protection** — automatically reduces position size as drawdown increases\n"
          f"- **Cooldown periods** — prevents revenge trading after losses\n\n"
-         f"These rules aren't suggestions — they're hard-coded into every trade the Smart Money engine places."),
+         f"These rules aren't suggestions — they're hard-coded into every trade the FOREXIA engine places."),
         (f"Common Mistakes With {kw_str.title()}",
          f"Even experienced traders make these mistakes when applying {kw_str}:\n\n"
          f"- **Trading outside kill zones** — Most of the noise happens during off-hours. Stay disciplined.\n"
@@ -452,7 +452,7 @@ async def generate_blog_article(req: BlogGenerateRequest):
          f"{kw_str.title()} is not a magic indicator — it's a framework for understanding how institutional capital moves through the NAS100 market. "
          f"By combining the Signature Trade detection, kill zone timing, Hegelian weekly structure, and APEX-compliant risk management, "
          f"you can align your trading with the forces that actually drive price.\n\n"
-         f"**Ready to put this into action?** The Smart Money engine automates all of this — scanning for setups every 10 seconds, "
+         f"**Ready to put this into action?** The FOREXIA engine automates all of this — scanning for setups every 10 seconds, "
          f"generating full analysis theses for each signal, and executing trades on Tradovate with institutional precision."),
     ]
 
@@ -473,7 +473,7 @@ async def generate_blog_article(req: BlogGenerateRequest):
     title_templates = [
         f"{kw_str.title()}: The Complete Guide for NAS100 Traders",
         f"How to Master {kw_str.title()} in NAS100 Futures Trading",
-        f"{kw_str.title()} Explained: What Smart Money Traders Know",
+        f"{kw_str.title()} Explained: What FOREXIA Traders Know",
         f"The Ultimate {kw_str.title()} Strategy for NAS100 | 2026 Guide",
         f"{kw_str.title()}: 5 Key Concepts Every Futures Trader Needs",
     ]
